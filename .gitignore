@@ -1,0 +1,11 @@
+# Fichiers OS
+.DS_Store
+Thumbs.db
+
+# Éditeurs
+.vscode/
+.idea/
+*.swp
+
+# Drafts privés
+*.draft.md
