@@ -9,3 +9,6 @@ Thumbs.db
 
 # Drafts privés
 *.draft.md
+
+# LibreOffice/Office lock files
+.~lock.*#
