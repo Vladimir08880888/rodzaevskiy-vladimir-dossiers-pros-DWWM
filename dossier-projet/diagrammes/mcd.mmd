@@ -1,0 +1,69 @@
+%% MCD — Modèle Conceptuel de Données (Merise)
+%% Reminder Famille
+%%
+%% Notation : entité [propriétés] — relation [cardinalités min,max]
+%% Rendu Mermaid : entity-relationship diagram (proche du MCD)
+
+erDiagram
+    USER {
+        int id PK
+        string email UK
+        string password_hash
+        string first_name
+        string last_name
+        string calendar_token UK
+        datetime created_at
+    }
+
+    FAMILY {
+        int id PK
+        string name
+        string invite_code UK
+        int created_by FK
+        datetime created_at
+    }
+
+    FAMILY_MEMBER {
+        int family_id PK_FK
+        int user_id PK_FK
+        enum role "parent | child"
+        boolean is_admin
+        enum status "active | pending"
+        datetime joined_at
+    }
+
+    TASK {
+        int id PK
+        int user_id FK
+        int family_id FK_nullable
+        int assigned_to FK_nullable
+        string title
+        text description
+        enum category
+        enum priority "low | medium | high"
+        enum frequency "once | daily | weekly | monthly | yearly"
+        date due_date
+        enum status "pending | pending_review | completed"
+        datetime completed_at
+        int completed_by FK_nullable
+        datetime created_at
+        datetime updated_at
+    }
+
+    TASK_COMMENT {
+        int id PK
+        int task_id FK
+        int user_id FK
+        text body
+        datetime created_at
+    }
+
+    USER ||--o{ FAMILY              : "crée (created_by)"
+    USER ||--o{ FAMILY_MEMBER       : "appartient à"
+    FAMILY ||--o{ FAMILY_MEMBER     : "regroupe"
+    USER ||--o{ TASK                : "crée (auteur)"
+    FAMILY ||--o{ TASK              : "contient (optionnel)"
+    USER ||--o{ TASK                : "assignée à (optionnel)"
+    USER ||--o{ TASK                : "complète (optionnel)"
+    TASK ||--o{ TASK_COMMENT        : "reçoit"
+    USER ||--o{ TASK_COMMENT        : "écrit"

@@ -1,0 +1,69 @@
+%% MLD — Modèle Logique de Données
+%% Reminder Famille
+%%
+%% Représente les tables physiques avec clés primaires, étrangères, index.
+%% Les énumérations sont matérialisées par des types ENUM MySQL.
+
+erDiagram
+    users {
+        INT id PK "AUTO_INCREMENT"
+        VARCHAR_255 email UK
+        VARCHAR_255 password_hash
+        VARCHAR_100 first_name
+        VARCHAR_100 last_name
+        VARCHAR_64 calendar_token UK
+        DATETIME created_at "DEFAULT CURRENT_TIMESTAMP"
+    }
+
+    families {
+        INT id PK "AUTO_INCREMENT"
+        VARCHAR_100 name
+        VARCHAR_32 invite_code UK
+        INT created_by FK "→ users.id ON DELETE RESTRICT"
+        DATETIME created_at "DEFAULT CURRENT_TIMESTAMP"
+    }
+
+    family_members {
+        INT family_id PK_FK "→ families.id ON DELETE CASCADE"
+        INT user_id PK_FK "→ users.id ON DELETE CASCADE"
+        ENUM role "(parent,child) DEFAULT child"
+        BOOLEAN is_admin "DEFAULT FALSE"
+        ENUM status "(active,pending) DEFAULT pending"
+        DATETIME joined_at "DEFAULT CURRENT_TIMESTAMP"
+    }
+
+    tasks {
+        INT id PK "AUTO_INCREMENT"
+        INT user_id FK "→ users.id ON DELETE CASCADE"
+        INT family_id FK_NULL "→ families.id ON DELETE CASCADE"
+        INT assigned_to FK_NULL "→ users.id ON DELETE SET NULL"
+        VARCHAR_200 title
+        TEXT description
+        ENUM category "(7 valeurs)"
+        ENUM priority "(low,medium,high)"
+        ENUM frequency "(once,daily,weekly,monthly,yearly)"
+        DATE due_date
+        ENUM status "(pending,pending_review,completed)"
+        DATETIME completed_at
+        INT completed_by FK_NULL "→ users.id ON DELETE SET NULL"
+        DATETIME created_at
+        DATETIME updated_at "ON UPDATE CURRENT_TIMESTAMP"
+    }
+
+    task_comments {
+        INT id PK "AUTO_INCREMENT"
+        INT task_id FK "→ tasks.id ON DELETE CASCADE"
+        INT user_id FK "→ users.id ON DELETE CASCADE"
+        TEXT body
+        DATETIME created_at
+    }
+
+    users ||--o{ families            : "1,1 → 0,N created_by"
+    users ||--o{ family_members      : "1,1 → 0,N"
+    families ||--o{ family_members   : "1,1 → 0,N"
+    users ||--o{ tasks               : "1,1 → 0,N user_id (auteur)"
+    families ||--o{ tasks            : "0,1 → 0,N family_id"
+    users ||--o{ tasks               : "0,1 → 0,N assigned_to"
+    users ||--o{ tasks               : "0,1 → 0,N completed_by"
+    tasks ||--o{ task_comments       : "1,1 → 0,N"
+    users ||--o{ task_comments       : "1,1 → 0,N"

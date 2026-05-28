@@ -1,0 +1,49 @@
+%% Diagramme de Packages — UML
+%% Reminder Famille — architecture en couches
+%%
+%% Front et back sont deux applications autonomes communiquant via HTTP/JSON.
+%% Chaque couche n'appelle que la couche directement inférieure (Inversion contrôlée).
+
+flowchart TB
+    subgraph FRONT["💻 reminder-front (React 18 + Vite)"]
+        F_PAGES["📄 pages/<br/>Login, Dashboard, TasksList,<br/>FamilyDetail, Profile, Stats…"]
+        F_COMPONENTS["🧩 components/<br/>layout, tasks, families,<br/>calendar, modals"]
+        F_CONTEXT["🌐 context/<br/>Auth, Family, Theme,<br/>Toast, Confirm"]
+        F_API["📡 api/<br/>auth, users, families,<br/>tasks, stats, comments"]
+        F_UTILS["🛠️ utils/<br/>dates, enums, fetch client"]
+
+        F_PAGES --> F_COMPONENTS
+        F_PAGES --> F_CONTEXT
+        F_PAGES --> F_API
+        F_API --> F_UTILS
+        F_COMPONENTS --> F_CONTEXT
+    end
+
+    subgraph BACK["⚙️ reminder-back (Node.js 22 + Express)"]
+        B_ROUTES["🚦 routes/<br/>auth, users, families,<br/>tasks, stats, calendar"]
+        B_MIDDLEWARE["🛡️ middleware/<br/>auth JWT, familyAccess,<br/>rateLimit, errorHandler"]
+        B_CONTROLLERS["🎯 controllers/<br/>1 fichier par domaine —<br/>logique métier"]
+        B_VALIDATORS["✅ validators/<br/>auth, family, task —<br/>HttpError 400"]
+        B_MODELS["📦 models/<br/>user, family, familyMember,<br/>task, taskComment — SQL préparé"]
+        B_SERVICES["🔧 services/<br/>password (bcrypt), jwt,<br/>ical, tempPassword"]
+        B_DB["💾 db/<br/>pool, migrate, seed"]
+
+        B_ROUTES --> B_MIDDLEWARE
+        B_ROUTES --> B_CONTROLLERS
+        B_CONTROLLERS --> B_VALIDATORS
+        B_CONTROLLERS --> B_MODELS
+        B_CONTROLLERS --> B_SERVICES
+        B_MODELS --> B_DB
+    end
+
+    DB[(🗄️ MariaDB 10.11<br/>5 tables, 6 migrations)]
+    B_DB --> DB
+
+    F_API -.->|HTTP JSON<br/>+ JWT Bearer| B_ROUTES
+
+    classDef front  fill:#e0e7ff,stroke:#6366f1,color:#1e1b3a
+    classDef back   fill:#fce7f3,stroke:#ec4899,color:#1e1b3a
+    classDef db     fill:#cffafe,stroke:#0891b2,color:#0a3a4a
+    class F_PAGES,F_COMPONENTS,F_CONTEXT,F_API,F_UTILS front
+    class B_ROUTES,B_MIDDLEWARE,B_CONTROLLERS,B_VALIDATORS,B_MODELS,B_SERVICES,B_DB back
+    class DB db

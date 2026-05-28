@@ -1,0 +1,57 @@
+%% Diagramme d'Activité — Validation Parent (Mission 2)
+%% Reminder Famille
+%%
+%% Flux : enfant termine une tâche familiale → parent valide ou rejette
+%% C'est la différence clé entre tâche personnelle et tâche familiale assignée.
+
+flowchart TD
+    START([Enfant ouvre ChildDashboard]) --> LIST[GET /api/tasks<br/>liste tâches assignées]
+    LIST --> CHOOSE[Choisit tâche à terminer]
+    CHOOSE --> CLICK[Clic bouton 'Terminer']
+    CLICK --> POST[POST /api/tasks/:id/complete]
+
+    POST --> CTRL[tasksController.complete]
+    CTRL --> CHECK_TASK{Tâche existe ?}
+    CHECK_TASK -- Non 404 --> END_ERR1([Erreur affichée])
+    CHECK_TASK -- Oui --> CHECK_STATUS{status =<br/>pending ?}
+    CHECK_STATUS -- pending_review --> END_ERR2([400 Déjà en attente])
+    CHECK_STATUS -- completed --> END_ERR3([400 Déjà terminée])
+    CHECK_STATUS -- pending --> ASSERT[assertCanComplete]
+
+    ASSERT --> CHECK_FAMILY{Tâche familiale ?}
+    CHECK_FAMILY -- Non perso --> SIMPLE[Tâche personnelle :<br/>UPDATE status='completed']
+    SIMPLE --> END_OK1([Terminée immédiatement])
+
+    CHECK_FAMILY -- Oui --> CHECK_ROLE{Rôle utilisateur ?}
+    CHECK_ROLE -- parent --> SIMPLE
+    CHECK_ROLE -- child --> CHECK_ASSIGN{assigned_to =<br/>user.id ?}
+    CHECK_ASSIGN -- Non --> END_ERR4([403 Pas votre tâche])
+    CHECK_ASSIGN -- Oui --> MARK_REVIEW[markPendingReview<br/>UPDATE status='pending_review'<br/>completed_by=child.id]
+
+    MARK_REVIEW --> NOTIF1[Front : toast<br/>'En attente de validation']
+    NOTIF1 --> PARENT_WAIT([Parent voit la tâche<br/>en orange sur son dashboard])
+
+    PARENT_WAIT --> PARENT_DECIDE{Parent décide}
+    PARENT_DECIDE -- Valide --> APPROVE[POST /api/tasks/:id/approve]
+    PARENT_DECIDE -- Rejette --> REJECT[POST /api/tasks/:id/reject]
+
+    APPROVE --> CHECK_FREQ{frequency =<br/>once ?}
+    CHECK_FREQ -- once --> MARK_COMPLETED[UPDATE status='completed'<br/>completed_at=NOW]
+    CHECK_FREQ -- récurrente --> ADVANCE[DATE_ADD due_date,<br/>INTERVAL n unit<br/>status reste 'pending']
+    MARK_COMPLETED --> END_OK2([Validée])
+    ADVANCE --> END_OK3([Avancée à prochaine occurrence])
+
+    REJECT --> RESET[UPDATE status='pending'<br/>completed_by=NULL]
+    RESET --> NOTIF2[Enfant voit notification :<br/>'Rejetée, à refaire']
+    NOTIF2 --> END_REJ([Retour pending])
+
+    classDef start fill:#10b981,color:#fff
+    classDef decision fill:#f59e0b,color:#000
+    classDef error fill:#ef4444,color:#fff
+    classDef ok fill:#6366f1,color:#fff
+    classDef parent fill:#ec4899,color:#fff
+    class START start
+    class END_OK1,END_OK2,END_OK3,END_REJ ok
+    class END_ERR1,END_ERR2,END_ERR3,END_ERR4 error
+    class CHECK_TASK,CHECK_STATUS,CHECK_FAMILY,CHECK_ROLE,CHECK_ASSIGN,CHECK_FREQ,PARENT_DECIDE decision
+    class APPROVE,REJECT,PARENT_WAIT parent
