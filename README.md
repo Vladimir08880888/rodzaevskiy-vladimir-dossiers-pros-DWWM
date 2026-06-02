@@ -75,9 +75,14 @@ Contenu :
 > Application web full-stack de gestion des tâches familiales.
 > React 18 + Vite (front) / Node.js + Express + mysql2 (back) / MariaDB 10.11.
 
+🌐 **Application en ligne** : https://reminder-famille.vercel.app
 🔗 **Code source** : https://github.com/Vladimir08880888/reminder-famille
 
-🎯 **Démo locale** : `marie@famille.fr` / `motdepasse123` (après `npm run seed`)
+🎯 **Comptes démo** (en production) :
+- `marie@famille.fr / motdepasse123` (parent admin)
+- `paul@famille.fr / motdepasse123` (parent)
+- `leo@famille.fr / motdepasse123` (enfant)
+- `ana@famille.fr / motdepasse123` (enfant)
 
 Fonctionnalités clés :
 - Familles avec rôles **parent / enfant** + workflow de validation parent

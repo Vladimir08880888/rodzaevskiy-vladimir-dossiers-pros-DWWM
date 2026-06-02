@@ -41,6 +41,7 @@ Ce dossier présente la conception, l'architecture et l'implémentation du
 projet, ainsi que les choix techniques et leur justification dans le
 cadre du Titre Professionnel **Développeur Web et Web Mobile**.
 
+> 🌐 **Application en ligne** : https://reminder-famille.vercel.app
 > 🔗 **Code source** : https://github.com/Vladimir08880888/reminder-famille
 > 📂 **Dossiers AFPA** : https://github.com/Vladimir08880888/vladimir-rodzaevski-dossiers-pros-DWWM
 
@@ -1112,18 +1113,34 @@ Difficultés :
 
 ## 13. Déploiement
 
-### 13.1 État actuel
+### 13.1 État actuel — DÉPLOYÉ EN PRODUCTION ✅
 
-Le projet est **fonctionnel en local uniquement**. Le déploiement a été
-priorisé après le polish fonctionnel (choix assumé pour soutenance).
+L'application est en ligne et accessible publiquement :
 
-### 13.2 Plan de déploiement (préparé)
-
-| Composant | Cible | Coût |
+| URL | Hébergeur | Statut |
 |---|---|---|
-| Front (build Vite) | **Vercel** | gratuit |
-| Back (Express) | **Fly.io** | gratuit (3 machines partagées) |
-| BDD (MariaDB) | **Fly.io** machine séparée + volume persistant | gratuit |
+| **Front** : https://reminder-famille.vercel.app | Vercel | ✅ live |
+| **API** : https://reminder-famille-back.fly.dev | Fly.io | ✅ healthy |
+| **Health** : https://reminder-famille-back.fly.dev/health | — | `{"status":"ok","db":"ok"}` |
+
+**Comptes de démonstration** (data persistante en production) :
+- `marie@famille.fr` / `motdepasse123` — parent admin
+- `paul@famille.fr` / `motdepasse123` — parent
+- `leo@famille.fr` / `motdepasse123` — enfant
+- `ana@famille.fr` / `motdepasse123` — enfant
+
+### 13.2 Architecture de déploiement
+
+| Composant | Hébergeur | Configuration | Coût |
+|---|---|---|---|
+| Front (build Vite) | **Vercel** | auto-deploy depuis branche `main` GitHub | gratuit |
+| Back (Express) | **Fly.io** | Docker, région `cdg` (Paris), 512 MB RAM | gratuit |
+| BDD (MariaDB 10.11) | **Fly.io** (même container) | volume persistant 1 GB sur `/var/lib/mysql` | gratuit |
+
+**Choix de co-localisation back+BDD** : sur le free tier Fly.io, une seule
+machine par app est gratuite. Pour limiter le coût, MariaDB tourne dans
+le même conteneur que Node, avec un script `start.sh` qui orchestre les
+deux processus. En prod sérieuse on séparerait sur 2 machines.
 
 ### 13.3 Bonnes pratiques générales
 
@@ -1131,27 +1148,91 @@ priorisé après le polish fonctionnel (choix assumé pour soutenance).
 - Versionné : `.env.example` avec valeurs factices documentant les variables
 - Non versionné : `.env` réel (gitignored)
 - En production : variables injectées via `fly secrets set DB_PASSWORD=...`
+  et via dashboard Vercel pour le front (`VITE_API_BASE`)
 
 #### Séparation des environnements
 - `development` : local, MariaDB local, logs verbose
-- `staging` : Fly.io app dédiée, BDD séparée, données de test
-- `production` : Fly.io app prod, BDD prod, monitoring
+- `production` : Fly.io + Vercel, JWT_SECRET et DB_PASSWORD aléatoires
+  forts (24+ caractères), rate limit strict (5 logins/15 min)
 
-### 13.4 Conteneurisation (Docker — futur)
+### 13.4 Conteneurisation (Docker)
+
+`back/Dockerfile` réellement utilisé en production :
 
 ```dockerfile
-# back/Dockerfile (prévu)
-FROM node:22-alpine
+FROM node:22-bookworm-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      mariadb-server mariadb-client curl ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN sed -i 's/^bind-address.*/bind-address = 127.0.0.1/' \
+      /etc/mysql/mariadb.conf.d/50-server.cnf
+
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci --only=production
-COPY src/ ./src/
-COPY migrations/ ./migrations/
+RUN npm ci --omit=dev
+COPY . .
+
+COPY scripts/start.sh /usr/local/bin/start.sh
+RUN chmod +x /usr/local/bin/start.sh
+
+VOLUME ["/var/lib/mysql"]
 EXPOSE 3000
-CMD ["node", "src/index.js"]
+CMD ["/usr/local/bin/start.sh"]
 ```
 
-### 13.5 Scripts de déploiement
+`back/scripts/start.sh` initialise MariaDB (à la première création de
+volume), démarre `mariadbd` en arrière-plan, crée la base et l'utilisateur
+applicatif s'ils n'existent pas, exécute les migrations, puis lance Node
+au premier plan.
+
+### 13.5 Configuration Fly.io (`back/fly.toml`)
+
+```toml
+app = "reminder-famille-back"
+primary_region = "cdg"
+
+[mounts]
+  source = "reminder_db_data"
+  destination = "/var/lib/mysql"
+
+[http_service]
+  internal_port = 3000
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"
+```
+
+`auto_stop_machines = "stop"` + `min_machines_running = 0` → la machine
+s'éteint quand inactive (coût 0 €). Premier appel après inactivité prend
+~3-6 s pour booter.
+
+### 13.6 Configuration Vercel (`front/vercel.json` + `.env.production`)
+
+```json
+{
+  "framework": "vite",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+}
+```
+
+```env
+# front/.env.production — valeur lue par Vite au build
+VITE_API_BASE=https://reminder-famille-back.fly.dev/api
+```
+
+Vercel détecte automatiquement le framework Vite, build `npm run build`,
+et sert `dist/` derrière CDN global avec HTTPS automatique.
+
+### 13.7 Scripts de déploiement
 
 - `back/package.json` :
   ```json
@@ -1223,7 +1304,7 @@ de code défensif.
 | PWA installable | ✅ (au-delà du CDC) |
 | Mode sombre | ✅ (au-delà du CDC) |
 | Reset MDP par admin | ✅ (au-delà du CDC) |
-| Déploiement en ligne | ⏸ Reporté |
+| Déploiement en ligne | ✅ **DÉPLOYÉ** sur Vercel + Fly.io |
 
 **Résultat** : 100% du CDC livré + 8 fonctionnalités au-delà.
 

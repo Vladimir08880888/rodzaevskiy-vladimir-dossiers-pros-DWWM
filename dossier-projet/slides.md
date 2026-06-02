@@ -333,7 +333,7 @@ diagrammes UML/Merise
 - **Pas d'ORM** → SQL visible, plus de boilerplate mais maîtrise
 - **Pas de TypeScript** → temps gagné, risques runtime
 - **Pas de tests unitaires** → 57 d'intégration à la place
-- **Pas de déploiement** → priorité polish fonctionnel
+- **Node + MariaDB co-localisés** sur 1 machine Fly (free tier)
 
 </div>
 <div>
@@ -341,11 +341,11 @@ diagrammes UML/Merise
 ### 🚀 Évolutions identifiées
 
 - Tests unitaires Vitest
-- CI/CD GitHub Actions
+- CI/CD GitHub Actions (auto-deploy sur push)
 - Notifications email (Resend)
 - Bot Telegram pour rappels temps réel
 - PWA mode offline
-- Déploiement Vercel + Fly.io
+- Séparation back / BDD sur 2 machines Fly
 
 </div>
 </div>
@@ -356,11 +356,14 @@ diagrammes UML/Merise
 
 # Merci pour votre attention
 
-🌐 **GitHub** :
+🌐 **Application live** :
+**reminder-famille.vercel.app**
+
+💻 **GitHub** :
 github.com/Vladimir08880888/reminder-famille
 github.com/Vladimir08880888/vladimir-rodzaevski-dossiers-pros-DWWM
 
-🎯 **Démo locale** :
+🎯 **Comptes démo** :
 `marie@famille.fr` / `motdepasse123`
 
 📖 **Code MIT** — auto-hébergeable

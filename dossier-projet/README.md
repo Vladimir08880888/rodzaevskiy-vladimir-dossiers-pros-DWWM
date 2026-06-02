@@ -16,7 +16,7 @@ Document technique présentant le projet (**20 pages maximum**).
 10. **Mission 1 — Authentification + Familles** (CRUD + permissions)
 11. **Mission 2 — Tâches + Validation parent** (API + AJAX-style)
 12. **Mission 3 — Export iCal** (intégration standard externe)
-13. **Déploiement** — environnements, .env, Docker (futur)
+13. **Déploiement** — Vercel (front) + Fly.io (back+BDD), Docker, volumes persistants ✅ EN LIGNE
 14. **Sécurité** — SQL injection, XSS, CSRF, hash, contrôle d'accès
 15. **Conclusion générale** — bilan, formation, suite
 

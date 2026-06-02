@@ -100,7 +100,9 @@ AT1_PERIODE_DU = "Avril 2026"
 AT1_PERIODE_AU = "Mai 2026"
 
 AT1_INFOS_COMPL = (
-    "Code source public sous licence MIT : \n"
+    "Application déployée en ligne :\n"
+    "https://reminder-famille.vercel.app\n\n"
+    "Code source public sous licence MIT :\n"
     "https://github.com/Vladimir08880888/reminder-famille\n\n"
     "Documents complémentaires (annexes) :\n"
     "  • DP détaillé (3 exemples Front documentés ligne par ligne) : DP.pdf\n"
@@ -199,7 +201,9 @@ AT2_PERIODE_DU = AT1_PERIODE_DU
 AT2_PERIODE_AU = AT1_PERIODE_AU
 
 AT2_INFOS_COMPL = (
-    "Code source public sous licence MIT : \n"
+    "Application déployée en ligne :\n"
+    "https://reminder-famille.vercel.app\n\n"
+    "Code source public sous licence MIT :\n"
     "https://github.com/Vladimir08880888/reminder-famille\n\n"
     "Documents complémentaires (annexes) :\n"
     "  • DP détaillé (3 exemples Back documentés ligne par ligne) : DP.pdf\n"

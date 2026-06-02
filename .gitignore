@@ -12,3 +12,6 @@ Thumbs.db
 
 # LibreOffice/Office lock files
 .~lock.*#
+
+# LibreOffice temp files
+*.odt

@@ -854,9 +854,10 @@ fonctionnalité sans abonnement payant.
 
 À l'issue de la formation DWWM, je souhaite :
 
-- **Consolider mes acquis** en continuant à développer Reminder Famille
-  en production (déploiement Vercel + Fly.io, notifications email,
-  internationalisation)
+- **Maintenir et faire évoluer** Reminder Famille en production
+  (l'application est déjà déployée sur **Vercel + Fly.io** —
+  https://reminder-famille.vercel.app) : ajout de notifications email,
+  internationalisation, CI/CD GitHub Actions
 - **Rechercher une mission d'alternance ou un poste de junior
   développeur** dans une PME ou une startup, idéalement sur une stack
   Node.js/React proche de celle maîtrisée dans le projet
