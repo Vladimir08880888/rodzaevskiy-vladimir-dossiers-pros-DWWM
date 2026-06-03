@@ -977,6 +977,131 @@ pour étendre l'énumération `status`.
 
 ---
 
+## 12bis. Module métier — Planning de service (RestoTask V2)
+
+### 12bis.1 Pourquoi ce module
+
+Après les premières itérations centrées sur les tâches, j'ai identifié
+un manque structurel pour le contexte RestoTask : dans un restaurant,
+**tout le monde n'a pas de tâches**, mais **tout le monde a un shift**
+(planning de service). Le planning est le squelette opérationnel d'un
+établissement — sans lui, l'application reste un « todo list de luxe »,
+avec lui elle devient un véritable outil de gestion d'équipe.
+
+### 12bis.2 Modèle de données
+
+Migration `008_shifts.sql` ajoute une nouvelle table :
+
+```sql
+CREATE TABLE shifts (
+  id            INT AUTO_INCREMENT PRIMARY KEY,
+  family_id     INT NOT NULL,
+  user_id       INT NOT NULL,           -- l'équipier qui travaille
+  date          DATE NOT NULL,
+  shift_type    ENUM('matin','midi','coupure','soir','nuit') NOT NULL,
+  start_time    TIME DEFAULT NULL,
+  end_time      TIME DEFAULT NULL,
+  poste         ENUM('cuisine','salle','bar','plonge','administration') NOT NULL,
+  note          TEXT DEFAULT NULL,
+  created_by    INT DEFAULT NULL,
+  created_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+                  ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (family_id)  REFERENCES families(id) ON DELETE CASCADE,
+  FOREIGN KEY (user_id)    REFERENCES users(id)    ON DELETE CASCADE,
+  FOREIGN KEY (created_by) REFERENCES users(id)    ON DELETE SET NULL,
+  INDEX idx_shifts_user_date    (user_id, date),
+  INDEX idx_shifts_family_date  (family_id, date),
+  UNIQUE KEY ux_shift_user_day_type (user_id, date, shift_type)
+);
+```
+
+La contrainte `UNIQUE (user_id, date, shift_type)` empêche les doublons :
+un employé ne peut pas être assigné deux fois sur le même shift le
+même jour.
+
+### 12bis.3 Permissions
+
+| Action | Patron | Manager | Équipier |
+|---|---|---|---|
+| Voir les shifts de son établissement | ✅ tous | ✅ tous | ✅ **uniquement les siens** |
+| Créer / modifier / supprimer un shift | ✅ | ✅ | ❌ 403 |
+
+L'API force le filtre côté serveur (`if member.role === 'child' →
+userId = req.user.id`), donc un équipier ne peut pas contourner via
+les query parameters.
+
+### 12bis.4 Page `/planning` — grille hebdomadaire
+
+L'interface utilisateur :
+
+- **Lignes** : les 8 membres de l'établissement avec leur poste habituel
+- **Colonnes** : 7 jours (lundi → dimanche)
+- **Cellules** : badges colorés par type de shift (matin, midi, soir…)
+- **Manager** : clic sur cellule vide → modal de création ;
+  clic sur shift existant → modal d'édition ; corbeille pour supprimer
+- **Équipier** : voit la même grille, mais ses propres shifts uniquement
+
+Navigation : boutons `< Cette semaine >` pour changer de semaine.
+
+### 12bis.5 Intégration iCal — la valeur ajoutée
+
+Le service iCal existant (`buildIcal`) accepte maintenant un paramètre
+optionnel `shifts`. Chaque shift devient un VEVENT :
+
+```ics
+BEGIN:VEVENT
+UID:shift-42@reminder
+SUMMARY:🍽️ Service midi — salle — Bistrot du Vieux Port
+DTSTART:20260610T110000
+DTEND:20260610T153000
+DESCRIPTION:Poste : salle\nShift : midi
+BEGIN:VALARM
+TRIGGER:-PT2H
+DESCRIPTION:Service midi dans 2 h
+END:VALARM
+END:VEVENT
+```
+
+**Conséquence métier** : chaque équipier qui s'est abonné une fois à
+son flux iCal voit son planning de la semaine dans son **calendrier
+téléphone natif**, avec une notification de rappel **2 heures avant
+chaque shift**. Le manager n'a plus besoin d'envoyer le planning par
+WhatsApp ; il publie une fois, tout le monde est synchronisé.
+
+C'est cette intégration qui transforme la fonctionnalité « planning »
+d'un simple tableau interne en **service à valeur ajoutée distinctif**
+par rapport aux concurrents (Combo, Skello, Hublo) qui imposent
+l'installation d'une application dédiée.
+
+### 12bis.6 Données de démonstration
+
+Le seed `seed-resto.js` génère **124 shifts sur 14 jours** pour
+« Bistrot du Vieux Port » :
+
+- Lundi fermé (aucun shift)
+- Mardi-Dimanche : service midi (5 personnes) + service soir (5 personnes)
+- Vendredi soir : renfort cuisine + salle (jour le plus chargé)
+- Sophie (manager salle) et Ahmed (chef cuisine) sur les deux services
+- Plongeur Samir uniquement le soir
+
+Permet de démontrer pendant la soutenance la cohérence d'un planning
+réaliste, et la différence d'affichage entre Julien (vue patron, tous
+les shifts) et Lucas (vue équipier, ses 4 shifts soir uniquement).
+
+### 12bis.7 Mini-bilan du module
+
+Ce module a été ajouté **après** la prise de recul sur le pivot
+RestoTask. Il valide la démarche : le modèle de données initial (un
+utilisateur appartient à N familles avec un rôle) est suffisamment
+générique pour accueillir un nouveau concept métier (shifts) sans
+remettre en cause les fonctionnalités existantes. La table `shifts`
+réutilise les enums `POSTES` et `SHIFTS` introduits par la migration
+007, et le flux iCal absorbe naturellement les nouveaux événements
+sans modification structurelle.
+
+---
+
 ## 12. Mission n°3 — Export iCal (intégration standard tiers)
 
 ### 12.1 Introduction
@@ -1320,32 +1445,198 @@ de code défensif.
 
 ### 15.2 Bilan de la formation
 
-> Cette section nécessite une réflexion personnelle du candidat.
-> Points à aborder :
-> - Retour sur la reconversion (parcours initial → DWWM)
-> - Difficultés rencontrées pendant la formation et comment elles ont
->   été surmontées
-> - Compétences nouvellement acquises (back-end, front-end, BDD, DevOps)
-> - Apprentissages transversaux (gestion de projet, autonomie, recherche)
+> *Cette section reflète une réflexion personnelle. Le candidat est
+> invité à la relire et l'adapter avant la soutenance.*
+
+#### Retour sur la reconversion
+
+Mon parcours académique solide — deux Masters en économie et gestion
+d'entreprise obtenus respectivement à Moscou en 2004 et en France en
+2012 — m'avait éloigné progressivement du code, alors que mon parcours
+professionnel s'est construit dans les métiers de service à la personne
+pendant treize ans (dix ans en restauration comme manager et serveur,
+trois ans comme croupier en casino). La formation DWWM représente donc
+une **deuxième reconversion** : du commerce vers le service à
+quarante ans, puis du service vers le numérique à quarante-trois ans.
+
+Le choix de m'orienter vers le développement web répondait à plusieurs
+besoins convergents : retrouver une activité de réflexion structurée
+proche de ma formation initiale en économie, m'inscrire dans un secteur
+en croissance offrant une flexibilité horaire que les métiers de salle
+ne permettent pas, et capitaliser sur ma curiosité technologique de
+longue date.
+
+#### Difficultés rencontrées et comment elles ont été surmontées
+
+Trois difficultés ont jalonné la formation :
+
+1. **L'ampleur de l'écosystème JavaScript.** Le rythme d'apparition de
+   nouveaux outils (Vite, Vitest, Vercel, Fly.io…) demande une posture
+   d'apprentissage permanent. Je l'ai compensée en m'imposant une
+   discipline de lecture quotidienne (documentation officielle de
+   référence avant les tutoriels tiers) et en validant chaque concept
+   par un mini-prototype dans le cadre du projet plutôt qu'en isolation.
+
+2. **La maîtrise du SQL préparé sans ORM.** N'ayant pas le confort
+   d'un ORM (Sequelize, Prisma) pour assembler les requêtes, j'ai
+   dû maîtriser explicitement les jointures, les contraintes
+   d'intégrité, les énumérations MySQL et les stratégies de suppression
+   en cascade. Cette montée en compétence s'est avérée payante : la
+   couche de modèles du projet est compacte, lisible, et garantit
+   l'absence d'injection SQL — un atout pédagogique pour la soutenance.
+
+3. **L'autonomie sur un projet solo de bout en bout.** Sans pair-review
+   ni stand-up quotidien, j'ai dû mettre en place ma propre discipline
+   de gestion de projet : sprints d'une semaine avec un objectif
+   livrable, commits Git fréquents et descriptifs, suite de tests
+   d'intégration automatisée pour ne rien casser pendant les itérations
+   tardives.
+
+#### Compétences nouvellement acquises
+
+| Domaine | Acquisitions |
+|---|---|
+| Front-end | React 18 avec Context API et hooks personnalisés, Vite, React Router, Chart.js, CSS responsive mobile-first |
+| Back-end | Node.js, Express, mysql2 préparé, bcrypt, JWT, génération iCalendar RFC 5545, rate-limit |
+| Base de données | Conception Merise (MCD, MLD, MPD), migrations versionnées, intégrité référentielle, ENUM, index |
+| DevOps | Docker, Fly.io, Vercel, CI/CD GitHub Actions, gestion de secrets, volumes persistants |
+| Sécurité | OWASP Top 10 appliqué en pratique : injection SQL, XSS, CSRF, hash bcrypt, contrôle d'accès |
+| Transversales | Gestion de projet solo, rédaction de documentation technique (UML, Merise, Swagger), tests d'intégration |
+
+#### Apprentissages transversaux
+
+Au-delà du strict cadre technique, la formation m'a permis de
+consolider :
+
+- **Une posture d'apprentissage autonome** : savoir lire la
+  documentation officielle, identifier les sources fiables (MDN,
+  documentation Node/Express, OWASP) et écarter le bruit du web.
+- **Une rigueur de validation** : chaque hypothèse technique est
+  vérifiée par un test (manuel d'abord, automatisé ensuite). Les 57
+  scénarios de `tests/integration.sh` matérialisent cette discipline.
+- **Une capacité de cadrage** : passer d'un besoin flou (« mieux gérer
+  les tâches d'une famille ») à un cahier des charges structuré, puis
+  à une livraison déployée en production.
+
+Ces acquisitions s'inscrivent dans la continuité de mes formations
+initiales en économie et commerce — la modélisation, l'analyse
+critique et la conduite de projet — appliquées à un nouveau matériau.
 
 ### 15.3 La suite
 
 #### Évolutions techniques identifiées
 
-- **Tests unitaires** (Vitest) en complément de l'intégration
-- **CI/CD** GitHub Actions (lint + tests + déploiement auto)
+- **Tests unitaires** (Vitest) en complément des 57 scénarios d'intégration
+- **CI/CD** GitHub Actions (lint + tests + déploiement auto) — *en place
+  depuis juin 2026*
 - **Notifications email** via Resend ou Brevo (SMTP)
 - **Bot Telegram** pour rappels temps réel additionnels
 - **PWA mode offline** avec service worker
 - **TypeScript** pour catch d'erreurs au build
 - **Internationalisation** (anglais en plus du français)
+- **Séparation back / BDD** sur deux machines Fly pour passer en charge
+  réelle (actuellement co-localisés pour rester dans le free tier)
+
+#### Pivot envisagé : déclinaison professionnelle « RestoTask »
+
+Le modèle de données du projet (un utilisateur appartient à N familles
+avec un rôle différent dans chacune ; chaque famille contient des tâches
+récurrentes assignables aux membres ; les enfants exécutent et les
+parents valident) est **directement transposable au monde professionnel**,
+en particulier à la restauration — un secteur que je connais après dix
+années en salle et trois années en gestion de casino.
+
+##### Pertinence du pivot
+
+Les très petites entreprises de restauration (5 à 15 salariés) sont
+mal servies par les solutions existantes :
+
+| Solution | Limite pour le micro-restaurant |
+|---|---|
+| Combo (49–99 €/mois) | Pensé PME, complexité hors de proportion |
+| Skello | Tarif élevé, fonctionnalités RH avancées non nécessaires |
+| Hublo (29 €/mois) | Limité au planning, pas de task management |
+| Groupes WhatsApp | Aucune traçabilité, pas de validation, oublis fréquents |
+
+Aucune ne propose la synchronisation **iCal native** : c'est précisément
+là où mon projet apporte un différenciateur fort. Un commis ou un
+plongeur recevrait les rappels d'auto-contrôle HACCP, de nettoyage
+hebdomadaire ou de prise de température dans son **calendrier de
+téléphone**, sans installer la moindre application — un argument fort
+pour des équipes peu technophiles.
+
+##### Mapping du modèle de données
+
+| Reminder Famille (actuel) | RestoTask (pivot) |
+|---|---|
+| Utilisateur | Membre de l'équipe (employé) |
+| Famille | Établissement (restaurant, point de vente) |
+| `parent` admin | Gérant / patron |
+| `parent` (non-admin) | Manager / chef de cuisine |
+| `child` | Équipier (serveur, commis, plongeur) |
+| Tâche familiale | Tâche service |
+| Validation parent | Validation manager |
+| Récurrence (daily, weekly…) | Idem — sortie poubelle, commande primeur, inventaire mensuel |
+| Export iCal | Synchronisation avec Google Calendar / iPhone Calendar des équipiers |
+
+Le mapping est strict — aucun changement de structure de données n'est
+nécessaire, seul un travail de **renommage de chaînes** et de
+**catégories métier** (Hygiène/HACCP, Commandes fournisseurs, Caisse,
+Maintenance, Réglementaire…) est requis. Estimation : deux semaines.
+
+##### Exemples de tâches métier prêtes à seeder
+
+| Catégorie | Tâches récurrentes typiques |
+|---|---|
+| Hygiène / HACCP | Relevé température frigos positif et négatif (2× par jour), nettoyage profond hebdomadaire, auto-contrôle mensuel |
+| Commandes | Commande primeur (lundi), boucher (mardi), boissons (jeudi) |
+| Caisse | Fermeture quotidienne et dépôt au coffre |
+| RH | Planning de service hebdomadaire, paie mensuelle |
+| Réglementaire | Renouvellement licence IV, formation hygiène, contrôle DSV annuel |
+| Maintenance | Vidange filtre hotte, détartrage lave-vaisselle, contrôle extincteurs |
+
+Le projet repo contient déjà un seed alternatif `back/src/db/seed-resto.js`
+matérialisant ce pivot avec un établissement de démonstration de huit
+membres et dix-huit tâches métier — ce qui permet d'exposer la
+proposition de valeur à un prospect restaurateur sans aucun
+développement supplémentaire.
+
+##### Modèle économique envisagé
+
+Freemium SaaS sur la base d'un établissement par compte :
+
+- **Gratuit** : 1 établissement, jusqu'à 5 équipiers
+- **Pro 19 €/mois** : multi-établissements, paquets de templates HACCP
+  et nettoyage, export iCal multi-canaux
+- **Business 49 €/mois** : statistiques avancées, export comptable,
+  support prioritaire
+
+Cible initiale : 50 bistrots / brasseries / cafés indépendants de
+Marseille et de la région PACA dans les douze mois suivant la sortie
+de formation. Approche commerciale : démarche personnelle auprès de
+mon réseau de la restauration, ancien employeurs et collègues.
 
 #### Perspectives personnelles
 
-> Cette section nécessite une réflexion personnelle :
-> - Poursuite d'études envisagée (Bachelor, Master) ?
-> - Recherche d'emploi (poste visé, entreprise type) ?
-> - Projet entrepreneurial ?
+Mon projet professionnel s'articule autour de trois axes :
+
+1. **À court terme (6–12 mois)** : recherche d'un poste de développeur
+   junior, idéalement en alternance ou en mission, sur une stack
+   Node.js / React proche de celle maîtrisée pendant le projet.
+   Maintenance et évolution continue de l'application déployée
+   (notifications email, tests unitaires, internationalisation).
+
+2. **À moyen terme (1–2 ans)** : développement du pivot **RestoTask**
+   décrit ci-dessus en activité indépendante complémentaire. Mon double
+   parcours — économie / commerce d'une part, dix ans de restauration
+   et trois ans de casino d'autre part — me donne un angle d'attaque
+   sur un marché que peu de développeurs comprennent réellement, à
+   savoir les très petites entreprises de la restauration.
+
+3. **À plus long terme** : capitalisation des compétences techniques
+   acquises (rigueur back-end, sécurité OWASP, intégration de standards
+   ouverts) pour développer d'autres applications métier verticales
+   sur les secteurs que je connais — hôtellerie, jeu, service.
 
 ---
 
