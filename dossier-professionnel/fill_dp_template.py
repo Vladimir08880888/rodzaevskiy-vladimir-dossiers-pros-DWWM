@@ -674,18 +674,29 @@ def fill_sommaire(doc):
     write_cell(10, 1, "—")
     write_cell(10, -1, "—")
 
-    # AT3 + AT4 — non applicables (DWWM ne comporte que 2 AT)
-    write_cell(12, 0, "Non applicable (DWWM ne comporte que 2 AT)")
-    write_cell(12, -1, "—")
-    write_cell(13, 1, "—"); write_cell(13, -1, "—")
-    write_cell(14, 1, "—"); write_cell(14, -1, "—")
-    write_cell(15, 1, "—"); write_cell(15, -1, "—")
+    # AT3 + AT4 sont non applicables (DWWM ne comporte que 2 AT). Au lieu
+    # de laisser 8 lignes vides avec « — », on les utilise comme « table
+    # des matières détaillée » pour aider la lecture du jury.
 
-    write_cell(17, 0, "Non applicable")
-    write_cell(17, -1, "—")
-    write_cell(18, 1, "—"); write_cell(18, -1, "—")
-    write_cell(19, 1, "—"); write_cell(19, -1, "—")
-    write_cell(20, 1, "—"); write_cell(20, -1, "—")
+    # Rows 12-15 : sous-sections détaillées des AT1 et AT2.
+    write_cell(12, 0, "Sections détaillées des Activités-Types")
+    write_cell(12, -1, "—")
+    write_cell(13, 1, "AT1 — Description + extrait de code AuthContext (front)")
+    write_cell(13, -1, "5")
+    write_cell(14, 1, "AT1 — Moyens techniques, équipe, contexte, infos complémentaires")
+    write_cell(14, -1, "6")
+    write_cell(15, 1, "AT2 — Description du solver HCR + extrait de code filtre")
+    write_cell(15, -1, "8")
+
+    # Rows 17-20 : détail de la section Annexes (6 captures d'écran).
+    write_cell(17, 0, "Détail des captures d'écran (Annexes)")
+    write_cell(17, -1, "14")
+    write_cell(18, 1, "Capture 1 — Tableau de bord manager / Grille de planning hebdomadaire")
+    write_cell(18, -1, "14")
+    write_cell(19, 1, "Capture 2 — Modale Smart Planner / Édition équipier (5 profils + polyvalence)")
+    write_cell(19, -1, "16")
+    write_cell(20, 1, "Capture 3 — Statistiques Chart.js / Vue mobile responsive")
+    write_cell(20, -1, "18")
 
     # Diplômes / Déclaration / Documents / Annexes (rows 22-25)
     write_cell(22, -1, DIPL_PAGE)
