@@ -227,7 +227,7 @@ DIPLOMES = [
      "Université d'État (Moscou, Russie)",
      "2004"),
     ("Master 2 Commerce International",
-     "Université française",
+     "INSEEC — École de commerce, Paris",
      "2012"),
     ("Titre Professionnel Développeur Web et Web Mobile",
      "AFPA Marseille (en cours)",

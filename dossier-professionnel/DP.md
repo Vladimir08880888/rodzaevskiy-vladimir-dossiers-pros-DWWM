@@ -33,7 +33,7 @@
 | Année | Diplôme | Pays |
 |---|---|---|
 | **2004** | Master 2 Économie et Gestion d'Entreprise | Russie — Moscou |
-| **2012** | Master 2 Commerce International | France |
+| **2012** | Master 2 Commerce International — INSEEC | France — Paris |
 | 2026 | Titre Professionnel DWWM (en cours) | France — AFPA Marseille |
 
 ### 1.2 Parcours professionnel
@@ -74,7 +74,7 @@ transposables dans une équipe de développement.
 | Service client (serveur) | Empathie utilisateur, sens du détail UX |
 | Croupier (jeu, calculs rapides) | Rigueur, gestion du stress, attention soutenue |
 | Master Économie et Gestion d'Entreprise (Moscou 2004) | Modélisation, raisonnement analytique, lecture critique |
-| Master 2 Commerce International (France 2012) | Compréhension des enjeux produit / marché, intégration culturelle |
+| Master 2 Commerce International — INSEEC Paris (2012) | Compréhension des enjeux produit / marché, intégration culturelle |
 
 ---
 
