@@ -965,32 +965,26 @@ def fill_sommaire(doc):
     write_cell(9, 1, AT2B_EX_INTITULE);      write_cell(9, -1, "13")
     write_cell(10, 1, AT2C_EX_INTITULE);     write_cell(10, -1, "15")
 
-    # AT3 et AT4 sont non applicables (le titre DWWM ne comporte que
-    # 2 activités-types). On met un libellé explicite sur la ligne de
-    # titre pour éviter les rangées « — » que le jury pourrait lire
-    # comme des champs oubliés à remplir.
-    write_cell(12, 0, "Activité-type n°3 — non applicable (le titre "
-                       "DWWM ne comporte que 2 activités-types)")
-    write_cell(12, -1, "—")
-    for r in (13, 14, 15):
-        write_cell(r, 0, "")
-        write_cell(r, 1, "")
-        write_cell(r, -1, "")
+    # AT3 et AT4 sont non applicables au titre DWWM. On supprime
+    # entièrement les 10 rangées correspondantes (11-20) du sommaire
+    # pour que le jury ne voie plus de placeholders vides.
+    # Suppression de la fin vers le début pour préserver les indices.
+    for idx in range(20, 10, -1):
+        if idx < len(rows):
+            tr = rows[idx]
+            tr.getparent().remove(tr)
+    # Refresh rows ref pour les écritures suivantes.
+    rows = t._tbl.tr_lst
 
-    write_cell(17, 0, "Activité-type n°4 — non applicable")
-    write_cell(17, -1, "—")
-    for r in (18, 19, 20):
-        write_cell(r, 0, "")
-        write_cell(r, 1, "")
-        write_cell(r, -1, "")
-
-    # Diplômes / Déclaration / Documents / Annexes (rows 22-25)
-    write_cell(22, -1, "18")
-    write_cell(23, -1, "19")
-    write_cell(24, -1, "20")
-    write_cell(25, 0, "Annexes — 6 captures d'écran représentatives "
+    # Diplômes / Déclaration / Documents / Annexes — après suppression
+    # des 10 rangées AT3/AT4 (11-20), ces rangées sont désormais en
+    # indices 12, 13, 14, 15 (au lieu de 22-25).
+    write_cell(12, -1, "18")
+    write_cell(13, -1, "19")
+    write_cell(14, -1, "20")
+    write_cell(15, 0, "Annexes — 6 captures d'écran représentatives "
                       "de l'application Crew (pages 21-26)")
-    write_cell(25, -1, "21")
+    write_cell(15, -1, "21")
 
 
 def fill_documents_illustrant(doc):
