@@ -862,6 +862,36 @@ def fill_declaration(doc):
             set_paragraph_text(p, new)
 
 
+def ensure_page_break_before(doc, needle):
+    """Insère un saut de page AVANT le premier paragraphe contenant
+    `needle`, sauf si un PAGE_BREAK est déjà présent juste avant.
+
+    Utile pour s'assurer qu'un titre de section (ex : « Exemples de
+    pratique professionnelle ») démarre en haut d'une nouvelle page
+    plutôt que de se faire couper en bas de page précédente.
+    """
+    from docx.oxml.ns import qn
+    from docx.oxml import OxmlElement
+    for p in doc.paragraphs:
+        if needle not in p.text:
+            continue
+        # Vérifier si un PAGE_BREAK existe déjà dans le paragraphe précédent
+        prev = p._p.getprevious()
+        if prev is not None:
+            brs = prev.xpath('.//w:br[@w:type="page"]')
+            if brs:
+                return  # déjà présent
+        # Insérer un saut de page en début de ce paragraphe
+        # via un run avec <w:br w:type="page"/>
+        new_run = OxmlElement('w:r')
+        new_br = OxmlElement('w:br')
+        new_br.set(qn('w:type'), 'page')
+        new_run.append(new_br)
+        # On insère le run en TÊTE du paragraphe (avant les autres runs)
+        p._p.insert(0, new_run)
+        return
+
+
 def remove_excess_page_breaks(doc):
     """Supprime les paragraphes-saut-de-page entre AT1↔AT2 et AT2↔Titres.
 
@@ -1282,6 +1312,10 @@ def main():
     # Supprimer aussi les sauts de page « extra » entre AT1↔AT2 et
     # AT2↔Titres-diplômes pour éviter les pages vides.
     remove_excess_page_breaks(doc)
+
+    # S'assurer que les grandes sections démarrent en haut d'une page
+    # plutôt qu'en bas de la précédente (sinon le titre est coupé).
+    ensure_page_break_before(doc, "Exemples de pratique")
 
     append_visual_annexes(doc)
 
