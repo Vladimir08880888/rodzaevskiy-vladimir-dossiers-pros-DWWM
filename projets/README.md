@@ -1,19 +1,31 @@
 # Projets
 
-## Reminder Famille
+## Crew — Planification d'équipe intelligente
 
-Application full-stack de gestion familiale. Projet de fin de formation
-DWWM, développé en solo sur 2 mois.
+Application full-stack de planification de services pour la
+restauration. Projet de fin de formation DWWM, développé en solo
+sur 3 mois.
 
-- 🔗 **Code source** : https://github.com/Vladimir08880888/reminder-famille
-- 📖 [CDC](https://github.com/Vladimir08880888/reminder-famille/blob/main/CAHIER_DES_CHARGES.md)
-- 📋 [README](https://github.com/Vladimir08880888/reminder-famille/blob/main/README.md)
-- 🎤 [Plan de soutenance](https://github.com/Vladimir08880888/reminder-famille/blob/main/SOUTENANCE.md)
-- 🧪 [Tests d'intégration](https://github.com/Vladimir08880888/reminder-famille/blob/main/tests/integration.sh) — 57 scénarios
+- 🔗 **Code source** : https://github.com/Vladimir08880888/crew
+- 🌐 **Démo en ligne** : https://crew-planner-hazel.vercel.app
+- 📖 [Cahier des charges](https://github.com/Vladimir08880888/crew/blob/main/CAHIER_DES_CHARGES.md)
+- 📋 [README](https://github.com/Vladimir08880888/crew/blob/main/README.md)
+- 🎤 [Plan de soutenance](https://github.com/Vladimir08880888/crew/blob/main/SOUTENANCE.md)
+- 🧪 [Plan de tests](https://github.com/Vladimir08880888/crew/blob/main/annexes/PLAN_DE_TESTS.md) — 60+ scénarios Playwright
+- 📚 [Justification scientifique](https://github.com/Vladimir08880888/crew/blob/main/annexes/JUSTIFICATION_SCIENTIFIQUE.md) — 12 références peer-reviewed
 
 ### Stack
-- **Front** : React 18, Vite, React Router, Chart.js, CSS pur
+- **Front** : React 18, Vite, React Router, i18next (FR/EN), Chart.js, drag-and-drop natif, CSS pur
 - **Back** : Node.js 22, Express 4, mysql2 (SQL préparé, sans ORM)
 - **BDD** : MariaDB 10.11
-- **Sécurité** : bcrypt + JWT, rate-limit, prepared statements
-- **Standards** : iCal (RFC 5545) pour les notifications natives
+- **Sécurité** : bcrypt + JWT, rate-limit, prepared statements, helmet, CORS strict
+- **Standards** : iCal (RFC 5545) pour la synchronisation calendrier natif sans application
+- **Déploiement** : Vercel (front) + Fly.io (back + DB conteneurisée)
+
+### Fonctionnalités clés
+- 5 profils d'équipiers (Apprenti → Référent) avec poids normalisés [0;1]
+- Smart Planner — solver greedy avec contraintes Convention HCR (48 h/sem, 11 h/jour cuisinier)
+- Polyvalence multi-postes (théorème de la chaîne courte, Jordan & Graves 1995)
+- Optimisation cost-aware — masse salariale prévisionnelle exposée dans l'UI
+- Alertes science-based (KC & Terwiesch 2009 surcharge, Matre 2021 fatigue, Service Health Score composite)
+- 12 migrations SQL versionnées

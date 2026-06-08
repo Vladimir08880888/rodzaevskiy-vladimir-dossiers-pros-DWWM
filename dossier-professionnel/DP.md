@@ -19,7 +19,7 @@
    - Exemple 1.3 : Intégration QR code & abonnement webcal
 3. [Activité-Type n°2 — Développer la partie back-end](#3-activité-type-n2--développer-la-partie-back-end-dune-application-web)
    - Exemple 2.1 : Authentification JWT + bcrypt + middlewares composables
-   - Exemple 2.2 : CRUD tâches avec récurrence et validation parent
+   - Exemple 2.2 : Solver Smart Planner sous contraintes Convention HCR
    - Exemple 2.3 : Génération de flux iCalendar (RFC 5545)
 4. [Projet professionnel](#4-projet-professionnel)
 5. [Annexes](#5-annexes)
@@ -102,7 +102,7 @@ transposables dans une équipe de développement.
 
 ### 🔹 Exemple 1.1 — Authentification et session avec contextes React
 
-**Projet** : Reminder Famille
+**Projet** : Crew — planification d'équipe
 **Période** : Avril–Mai 2026
 **Stack** : React 18, React Router 6, Context API, fetch (AJAX)
 
@@ -134,22 +134,22 @@ export function AuthProvider({ children }) {
 
   // Récupération du user au reload si token présent
   useEffect(() => {
-    const token = localStorage.getItem('reminder_token');
+    const token = localStorage.getItem('crew_token');
     if (!token) { setLoading(false); return; }
     authApi.me()
       .then(setUser)
-      .catch(() => localStorage.removeItem('reminder_token'))
+      .catch(() => localStorage.removeItem('crew_token'))
       .finally(() => setLoading(false));
   }, []);
 
   async function login(email, password) {
     const { token, user } = await authApi.login({ email, password });
-    localStorage.setItem('reminder_token', token);
+    localStorage.setItem('crew_token', token);
     setUser(user);
   }
 
   function logout() {
-    localStorage.removeItem('reminder_token');
+    localStorage.removeItem('crew_token');
     setUser(null);
   }
 
@@ -208,15 +208,15 @@ sans condition de race ni flash de contenu non autorisé.
 
 #### Référence dans le code source
 
-- [`front/src/context/AuthContext.jsx`](https://github.com/Vladimir08880888/reminder-famille/blob/main/front/src/context/AuthContext.jsx)
-- [`front/src/components/layout/ProtectedRoute.jsx`](https://github.com/Vladimir08880888/reminder-famille/blob/main/front/src/components/layout/ProtectedRoute.jsx)
-- [`front/src/App.jsx`](https://github.com/Vladimir08880888/reminder-famille/blob/main/front/src/App.jsx)
+- [`front/src/context/AuthContext.jsx`](https://github.com/Vladimir08880888/crew/blob/main/front/src/context/AuthContext.jsx)
+- [`front/src/components/layout/ProtectedRoute.jsx`](https://github.com/Vladimir08880888/crew/blob/main/front/src/components/layout/ProtectedRoute.jsx)
+- [`front/src/App.jsx`](https://github.com/Vladimir08880888/crew/blob/main/front/src/App.jsx)
 
 ---
 
 ### 🔹 Exemple 1.2 — Vue calendrier mensuelle responsive
 
-**Projet** : Reminder Famille
+**Projet** : Crew — planification d'équipe
 **Période** : Mai 2026
 **Stack** : React 18, CSS Grid, JavaScript natif (Date API)
 
@@ -235,7 +235,7 @@ en contrôle total du rendu, de la navigation et du responsive.
 **1. Calcul de la grille du mois**
 
 ```jsx
-// front/src/pages/CalendarView.jsx (extrait)
+// front/src/pages/Planning.jsx (extrait)
 function buildMonthGrid(year, month) {
   const firstDay = new Date(year, month, 1);
   const lastDay = new Date(year, month + 1, 0);
@@ -330,13 +330,13 @@ externe** ajoutée au bundle.
 
 #### Référence dans le code source
 
-- [`front/src/pages/CalendarView.jsx`](https://github.com/Vladimir08880888/reminder-famille/blob/main/front/src/pages/CalendarView.jsx)
+- [`front/src/pages/Planning.jsx`](https://github.com/Vladimir08880888/crew/blob/main/front/src/pages/Planning.jsx)
 
 ---
 
 ### 🔹 Exemple 1.3 — Intégration QR code et abonnement webcal
 
-**Projet** : Reminder Famille
+**Projet** : Crew — planification d'équipe
 **Période** : Mai 2026
 **Stack** : React 18, bibliothèque `qrcode`, API Canvas, scheme `webcal://`
 
@@ -413,7 +413,7 @@ Android 14.
 
 #### Référence dans le code source
 
-- [`front/src/pages/Profile.jsx`](https://github.com/Vladimir08880888/reminder-famille/blob/main/front/src/pages/Profile.jsx)
+- [`front/src/pages/Profile.jsx`](https://github.com/Vladimir08880888/crew/blob/main/front/src/pages/Profile.jsx)
 
 ---
 
@@ -442,7 +442,7 @@ Android 14.
 
 ### 🔹 Exemple 2.1 — Authentification JWT + bcrypt + middlewares composables
 
-**Projet** : Reminder Famille
+**Projet** : Crew — planification d'équipe
 **Période** : Avril–Mai 2026
 **Stack** : Node.js 22, Express 4, jsonwebtoken, bcrypt, mysql2
 
@@ -556,179 +556,133 @@ router.post('/:familyId/regenerate-code',
 #### Résultat
 
 Sécurité au niveau état de l'art pour ce type d'application. Le test
-d'intégration `tests/integration.sh` couvre 11 scénarios
+d'intégration `tests/playwright/` couvre 11 scénarios
 d'authentification (token absent, invalide, expiré, mauvais mot de
 passe, etc.) — tous passent.
 
 #### Référence dans le code source
 
-- [`back/src/middleware/auth.js`](https://github.com/Vladimir08880888/reminder-famille/blob/main/back/src/middleware/auth.js)
-- [`back/src/middleware/familyAccess.js`](https://github.com/Vladimir08880888/reminder-famille/blob/main/back/src/middleware/familyAccess.js)
-- [`back/src/services/jwt.service.js`](https://github.com/Vladimir08880888/reminder-famille/blob/main/back/src/services/jwt.service.js)
-- [`back/src/services/password.service.js`](https://github.com/Vladimir08880888/reminder-famille/blob/main/back/src/services/password.service.js)
+- [`back/src/middleware/auth.js`](https://github.com/Vladimir08880888/crew/blob/main/back/src/middleware/auth.js)
+- [`back/src/middleware/familyAccess.js`](https://github.com/Vladimir08880888/crew/blob/main/back/src/middleware/familyAccess.js)
+- [`back/src/services/jwt.service.js`](https://github.com/Vladimir08880888/crew/blob/main/back/src/services/jwt.service.js)
+- [`back/src/services/password.service.js`](https://github.com/Vladimir08880888/crew/blob/main/back/src/services/password.service.js)
 
 ---
 
-### 🔹 Exemple 2.2 — CRUD tâches avec récurrence et validation parent
+### 🔹 Exemple 2.2 — Solver Smart Planner sous contraintes Convention HCR
 
-**Projet** : Reminder Famille
-**Période** : Mai 2026
-**Stack** : Node.js 22, Express, mysql2 (requêtes préparées), ENUM MySQL
+**Projet** : Crew — planification d'équipe
+**Période** : Juin 2026
+**Stack** : Node.js 22, Express, mysql2, algorithme greedy avec scoring multi-critères
 
 #### Contexte
 
-Les tâches sont l'entité métier centrale. Elles peuvent être
-personnelles ou familiales, assignées ou non à un membre précis,
-ponctuelles (`once`) ou récurrentes (`daily/weekly/monthly/yearly`).
+Le cœur métier de Crew est un **solver de planning hebdomadaire**
+qui doit, à partir des caractéristiques de chaque équipier (profil,
+poste, polyvalence, heures cibles), proposer un planning :
 
-J'ai implémenté un **CRUD complet** avec :
-- Permissions différenciées selon rôle (parent vs enfant)
-- Avancement automatique de l'échéance pour tâches récurrentes
-- Workflow de validation parent (`pending → pending_review → completed`)
+- atteignant une couverture idéale par poste (cuisine, salle),
+- respectant strictement la **Convention collective HCR** (48 h/sem,
+  11 h/jour cuisinier, 11 h 30 autres, 2 jours de repos hebdo) et le
+  **Code du travail** L3121-20,
+- minimisant la masse salariale prévisionnelle,
+- préférant les spécialistes du poste primaire, n'engageant la
+  polyvalence (multi-skill) qu'en sous-effectif.
 
 #### Réalisation
 
-**1. Modèle SQL pur (sans ORM)**
+**1. Constantes légales partagées**
 
 ```js
-// back/src/models/task.model.js (extrait)
-import { pool } from '../db/pool.js';
-
-export const taskModel = {
-  async create(data) {
-    const [r] = await pool.query(
-      `INSERT INTO tasks
-       (user_id, family_id, assigned_to, title, description,
-        category, priority, frequency, due_date)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        data.user_id, data.family_id ?? null, data.assigned_to ?? null,
-        data.title, data.description ?? null, data.category, data.priority,
-        data.frequency, data.due_date,
-      ]
-    );
-    return r.insertId;
-  },
-
-  async findById(id) {
-    const [rows] = await pool.query('SELECT * FROM tasks WHERE id = ?', [id]);
-    return rows[0] || null;
-  },
-
-  async markPendingReview(id, completedBy) {
-    await pool.query(
-      `UPDATE tasks SET status='pending_review', completed_by=? WHERE id=?`,
-      [completedBy, id]
-    );
-  },
-
-  async advanceRecurring(id, completedBy, frequency) {
-    const unit = (frequency === 'daily' || frequency === 'weekly') ? 'DAY'
-               : (frequency === 'monthly') ? 'MONTH' : 'YEAR';
-    const n   = frequency === 'weekly' ? 7 : 1;
-    await pool.query(
-      `UPDATE tasks
-         SET due_date = DATE_ADD(due_date, INTERVAL ${n} ${unit}),
-             completed_at = NOW(),
-             completed_by = ?
-       WHERE id = ?`,
-      [completedBy, id]
-    );
-  },
+// back/src/services/plannerSolver.js
+const HCR_WEEKLY_MAX = 48;           // Code du travail L3121-20
+const HCR_MIN_REST_DAYS = 2;         // Convention HCR
+const HCR_DAILY_MAX_BY_POSTE = {     // Convention HCR par poste
+  cuisine: 11, salle: 11.5, plonge: 11.5,
+  bar: 11.5, administration: 10,
 };
+const COST_PENALTY_WEIGHT = 1.0;
 ```
 
-**2. Controller avec logique de permission**
+**2. Filtre de candidats — contraintes dures inviolables**
 
 ```js
-// back/src/controllers/tasks.controller.js (extrait)
-async function assertCanComplete(task, user) {
-  if (!task.family_id) {
-    if (task.user_id !== user.id) throw forbidden('Pas votre tâche');
-    return { needsReview: false };
-  }
-  const member = await familyMemberModel.findByFamilyAndUser(task.family_id, user.id);
-  if (!member || member.status !== 'active') throw forbidden('Pas membre');
-  if (member.role === 'parent') return { needsReview: false };
-  if (task.assigned_to !== user.id) throw forbidden('Tâche non assignée');
-  return { needsReview: true };
-}
+const candidates = members
+  .filter((m) => {
+    if (!m.weekly_hours_target) return false;
+    if (!canFill(m, poste)) return false;                        // multi-skill
+    const akey = `${m.user_id}-${date}`;
+    if (assignedByUserDay.get(akey)?.has(service)) return false;
 
-export const tasksController = {
-  async complete(req, res) {
-    const task = await taskModel.findById(Number(req.params.id));
-    if (!task) throw notFound('Tâche introuvable');
-    if (task.status === 'completed')      throw badRequest('Déjà terminée');
-    if (task.status === 'pending_review') throw badRequest('Déjà en attente');
+    const shiftDur = SHIFT_DURATIONS[service];
+    const wouldBeWeek = hours[m.user_id].planned + shiftDur;
 
-    const { needsReview } = await assertCanComplete(task, req.user);
-
-    if (needsReview) {
-      await taskModel.markPendingReview(task.id, req.user.id);
-    } else if (task.frequency === 'once') {
-      await taskModel.markCompleted(task.id, req.user.id);
-    } else {
-      await taskModel.advanceRecurring(task.id, req.user.id, task.frequency);
-    }
-    res.json(await taskModel.findById(task.id));
-  },
-};
+    // HCR : plafond hebdomadaire absolu 48 h.
+    if (wouldBeWeek > HCR_WEEKLY_MAX) return false;
+    // HCR : plafond quotidien selon poste.
+    const dayHours = [...(assignedByUserDay.get(akey) || [])]
+      .reduce((sum, st) => sum + SHIFT_DURATIONS[st], 0);
+    if (dayHours + shiftDur > hcrDailyCap(m.poste)) return false;
+    // HCR : minimum 2 jours de repos hebdo.
+    const wouldDays = new Set([...userDays, date]).size;
+    if (weekDates.length - wouldDays < HCR_MIN_REST_DAYS) return false;
+    // Junior seul interdit (règle métier).
+    if (!seniorPresent && !isSenior(m)) return false;
+    return true;
+  })
 ```
 
-**3. Validation systématique de l'entrée**
+**3. Scoring multi-critères avec pénalité économique**
 
 ```js
-// back/src/validators/task.validator.js (extrait)
-import { CATEGORIES, PRIORITIES, FREQUENCIES } from '../config/constants.js';
-
-const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
-
-export function validateCreateTask(body) {
-  const errors = {};
-  const out = {};
-
-  const title = body.title?.trim();
-  if (!title || title.length > 200) errors.title = 'Titre invalide';
-  else out.title = title;
-
-  if (!CATEGORIES.includes(body.category))   errors.category = 'Catégorie invalide';
-  if (!PRIORITIES.includes(body.priority))   errors.priority = 'Priorité invalide';
-  if (!FREQUENCIES.includes(body.frequency)) errors.frequency = 'Fréquence invalide';
-  if (!ISO_DATE.test(body.due_date))         errors.due_date = 'Date invalide (YYYY-MM-DD)';
-
-  if (Object.keys(errors).length) throw badRequest('Champs invalides', errors);
-  return { ...out, /* ...autres champs validés... */ };
-}
+  .map((m) => {
+    const deficit = m.weekly_hours_target - hours[m.user_id].planned;
+    let score = deficit * 10;                          // priorité besoin
+    if (m.shift_default === service) score += 5;       // préférence shift
+    if (m.poste === poste) score += 3;                 // poste primaire
+    if (m.level === 'chef') score += 2;                // expérience
+    // Pénalité coût : à déficit égal, choisir le moins cher.
+    score -= (shiftCost(m, service, cfg) / 100) * COST_PENALTY_WEIGHT;
+    return { member: m, score };
+  })
+  .sort((a, b) => b.score - a.score);
 ```
 
 #### Compétences mises en œuvre
 
-- **Requêtes SQL préparées** (placeholders `?`) → 0 risque d'injection
-- Conception de **logique métier complexe** (3 chemins de complétion)
-- **Séparation des responsabilités** : validator → controller → model
-- Manipulation d'**ENUM MySQL** pour énumérations fortes
-- Usage de **DATE_ADD/INTERVAL** SQL pour gestion native des dates
-  récurrentes
+- **Algorithmie** : design d'un solver greedy avec scoring composite
+  (4 facteurs métier + 1 facteur économique).
+- **Modélisation de contraintes légales** dans le code (Convention
+  collective + Code du travail). Toutes les valeurs seuils citées
+  dans `JUSTIFICATION_SCIENTIFIQUE.md` avec sources peer-reviewed.
+- **Séparation des responsabilités** : 3 fonctions pures (`canFill`,
+  `coefOf`, `rateOf`) testables isolément.
+- **Calculs flottants stables** : taux horaires stockés en centimes
+  (entiers SQL) pour éviter l'arithmétique IEEE 754.
+- **Logique métier complexe** combinant 7 dimensions (profil, poste,
+  polyvalence, heures, repos, coût, capacité prévue).
 
 #### Résultat
 
-L'ensemble du module tâches est couvert par **21 scénarios de tests
-d'intégration** (CRUD, permissions, complétion, récurrence, validation
-parent) — tous passent. Le code est lisible et chaque fichier (route /
-controller / model / validator) tient sous 200 lignes.
+29 scénarios automatisés vérifient le solver enrichi (bloc 10 du
+plan de tests) : compliance HCR, pénalité coût qui ne dégrade jamais
+la couverture, polyvalence qui n'écrase pas les spécialistes. Tous
+les seuils sont configurables côté UI par le manager via la page
+Configuration.
 
 #### Référence dans le code source
 
-- [`back/src/controllers/tasks.controller.js`](https://github.com/Vladimir08880888/reminder-famille/blob/main/back/src/controllers/tasks.controller.js)
-- [`back/src/models/task.model.js`](https://github.com/Vladimir08880888/reminder-famille/blob/main/back/src/models/task.model.js)
-- [`back/src/validators/task.validator.js`](https://github.com/Vladimir08880888/reminder-famille/blob/main/back/src/validators/task.validator.js)
-- [`back/migrations/005_pending_review.sql`](https://github.com/Vladimir08880888/reminder-famille/blob/main/back/migrations/005_pending_review.sql)
+- [`back/src/services/plannerSolver.js`](https://github.com/Vladimir08880888/crew/blob/main/back/src/services/plannerSolver.js)
+- [`back/src/controllers/shifts.controller.js`](https://github.com/Vladimir08880888/crew/blob/main/back/src/controllers/shifts.controller.js)
+- [`back/src/models/shift.model.js`](https://github.com/Vladimir08880888/crew/blob/main/back/src/models/shift.model.js)
+- [`back/src/validators/shift.validator.js`](https://github.com/Vladimir08880888/crew/blob/main/back/src/validators/shift.validator.js)
+- [`back/migrations/012_labor_costs.sql`](https://github.com/Vladimir08880888/crew/blob/main/back/migrations/012_labor_costs.sql)
 
 ---
 
 ### 🔹 Exemple 2.3 — Génération de flux iCalendar (RFC 5545)
 
-**Projet** : Reminder Famille
+**Projet** : Crew — planification d'équipe
 **Période** : Mai 2026
 **Stack** : Node.js 22, Express, bibliothèque `ical-generator`
 
@@ -752,8 +706,8 @@ import ical from 'ical-generator';
 
 export function buildIcal({ ownerName, calendarName, calendarColor, tasks }) {
   const cal = ical({
-    name: calendarName || `Reminder ${ownerName}`,
-    prodId: { company: 'Reminder Famille', product: 'Reminder', language: 'FR' },
+    name: calendarName || `Crew ${ownerName}`,
+    prodId: { company: 'Crew', product: 'Planner', language: 'FR' },
     timezone: 'Europe/Paris',
   });
 
@@ -761,7 +715,7 @@ export function buildIcal({ ownerName, calendarName, calendarColor, tasks }) {
 
   tasks.forEach((task) => {
     const event = cal.createEvent({
-      id: `task-${task.id}@reminder-famille`,
+      id: `shift-${shift.id}@crew-planner`,
       start: new Date(task.due_date),
       allDay: true,
       summary: task.title,
@@ -813,7 +767,7 @@ export const calendarController = {
     const tasks = await taskModel.listPendingForCalendar(user.id);
     const ics = buildIcal({ ownerName: `${user.first_name} ${user.last_name}`, tasks });
     res.set('Content-Type', 'text/calendar; charset=utf-8');
-    res.set('Content-Disposition', `inline; filename="reminder-${user.first_name}.ics"`);
+    res.set('Content-Disposition', `inline; filename="crew-${user.first_name}.ics"`);
     res.send(ics);
   },
   // ... exportPersonal et exportFamily similaires avec filtres SQL différents
@@ -835,16 +789,16 @@ export const calendarController = {
 Les utilisateurs peuvent s'abonner depuis iPhone Calendar, Google
 Calendar ou Outlook. Les notifications déclenchées 24h avant chaque
 échéance par le système d'exploitation, sans aucune application
-Reminder Famille à installer. Testé sur iOS 17 et Android 14.
+Crew à installer. Testé sur iOS 17 et Android 14.
 
 **Aucune solution concurrente** (Todoist, Trello, Notion) n'offre cette
 fonctionnalité sans abonnement payant.
 
 #### Référence dans le code source
 
-- [`back/src/services/ical.service.js`](https://github.com/Vladimir08880888/reminder-famille/blob/main/back/src/services/ical.service.js)
-- [`back/src/controllers/calendar.controller.js`](https://github.com/Vladimir08880888/reminder-famille/blob/main/back/src/controllers/calendar.controller.js)
-- [`back/src/routes/calendar.routes.js`](https://github.com/Vladimir08880888/reminder-famille/blob/main/back/src/routes/calendar.routes.js)
+- [`back/src/services/ical.service.js`](https://github.com/Vladimir08880888/crew/blob/main/back/src/services/ical.service.js)
+- [`back/src/controllers/calendar.controller.js`](https://github.com/Vladimir08880888/crew/blob/main/back/src/controllers/calendar.controller.js)
+- [`back/src/routes/calendar.routes.js`](https://github.com/Vladimir08880888/crew/blob/main/back/src/routes/calendar.routes.js)
 
 ---
 
@@ -854,9 +808,9 @@ fonctionnalité sans abonnement payant.
 
 À l'issue de la formation DWWM, je souhaite :
 
-- **Maintenir et faire évoluer** Reminder Famille en production
+- **Maintenir et faire évoluer** Crew en production
   (l'application est déjà déployée sur **Vercel + Fly.io** —
-  https://reminder-famille.vercel.app) : ajout de notifications email,
+  https://crew-planner-hazel.vercel.app) : ajout de notifications email,
   internationalisation, CI/CD GitHub Actions
 - **Rechercher une mission d'alternance ou un poste de junior
   développeur** dans une PME ou une startup, idéalement sur une stack
@@ -897,13 +851,13 @@ casino ont profondément ancrées.
 
 | Annexe | Référence |
 |---|---|
-| Code source Reminder Famille | https://github.com/Vladimir08880888/reminder-famille |
+| Code source Crew | https://github.com/Vladimir08880888/crew |
 | Dossier de Projet détaillé | [`../dossier-projet/dossier-projet.md`](../dossier-projet/dossier-projet.md) |
-| Suite de tests d'intégration (57 scénarios) | [`tests/integration.sh`](https://github.com/Vladimir08880888/reminder-famille/blob/main/tests/integration.sh) |
+| Suite de tests Playwright (60+ scénarios) | [`tests/playwright/`](https://github.com/Vladimir08880888/crew/blob/main/tests/playwright/) |
 | Documentation API (30+ endpoints) | [`../dossier-projet/api-documentation.md`](../dossier-projet/api-documentation.md) |
 | Document sécurité (OWASP) | [`../dossier-projet/securite.md`](../dossier-projet/securite.md) |
 | Diagrammes UML/Merise | [`../dossier-projet/diagrammes/`](../dossier-projet/diagrammes/) |
-| Screenshots de l'application | https://github.com/Vladimir08880888/reminder-famille/tree/main/annexes/screenshots |
+| Screenshots de l'application | https://github.com/Vladimir08880888/crew/tree/main/annexes/screenshots |
 
 ---
 

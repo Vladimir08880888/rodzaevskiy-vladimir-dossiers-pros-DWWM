@@ -34,10 +34,10 @@ TITRE_PRO = "Développeur Web et Web Mobile (DWWM) — RNCP 37674, niveau 5"
 # ────────────────────────────────────────────────────────────────────────
 AT1_INTITULE = "Développer la partie front-end d'une application web ou web mobile sécurisée"
 
-AT1_EX_INTITULE = "Application Reminder Famille — front-end React 18 complet"
+AT1_EX_INTITULE = "Application Crew — planification d'équipe React 18 complète"
 
 AT1_TASKS = (
-    "Dans le cadre du projet de fin de formation Reminder Famille (gestion "
+    "Dans le cadre du projet de fin de formation Crew (gestion "
     "de tâches familiales avec rôles parent/enfant), j'ai réalisé l'intégralité "
     "de la partie front-end de l'application. J'ai notamment :\n\n"
     "• maquetté l'interface en mobile-first puis enrichi pour tablette et desktop "
@@ -94,16 +94,16 @@ AT1_AVEC_QUI = (
 )
 
 AT1_NOM_ENTREPRISE = ("AFPA Marseille — projet de fin de formation "
-                       "« Reminder Famille »")
+                       "« Crew »")
 AT1_SERVICE = "Formation DWWM, plateau pédagogique"
 AT1_PERIODE_DU = "Avril 2026"
 AT1_PERIODE_AU = "Mai 2026"
 
 AT1_INFOS_COMPL = (
     "Application déployée en ligne :\n"
-    "https://reminder-famille.vercel.app\n\n"
+    "https://crew-planner-hazel.vercel.app\n\n"
     "Code source public sous licence MIT :\n"
-    "https://github.com/Vladimir08880888/reminder-famille\n\n"
+    "https://github.com/Vladimir08880888/crew\n\n"
     "Documents complémentaires (annexes) :\n"
     "  • DP détaillé (3 exemples Front documentés ligne par ligne) : DP.pdf\n"
     "  • Dossier de Projet complet (20 pages) : dossier-projet.pdf\n"
@@ -119,10 +119,10 @@ AT1_INFOS_COMPL = (
 # ────────────────────────────────────────────────────────────────────────
 AT2_INTITULE = "Développer la partie back-end d'une application web ou web mobile sécurisée"
 
-AT2_EX_INTITULE = "Application Reminder Famille — API Node.js/Express sécurisée"
+AT2_EX_INTITULE = "Application Crew — API Node.js/Express sécurisée"
 
 AT2_TASKS = (
-    "Pour le même projet Reminder Famille, j'ai conçu et développé l'intégralité "
+    "Pour le même projet Crew, j'ai conçu et développé l'intégralité "
     "de la partie back-end : conception de la base de données, API REST "
     "sécurisée, et logique métier de l'application multi-utilisateurs.\n\n"
     "Conception de la base de données (Merise) :\n"
@@ -202,9 +202,9 @@ AT2_PERIODE_AU = AT1_PERIODE_AU
 
 AT2_INFOS_COMPL = (
     "Application déployée en ligne :\n"
-    "https://reminder-famille.vercel.app\n\n"
+    "https://crew-planner-hazel.vercel.app\n\n"
     "Code source public sous licence MIT :\n"
-    "https://github.com/Vladimir08880888/reminder-famille\n\n"
+    "https://github.com/Vladimir08880888/crew\n\n"
     "Documents complémentaires (annexes) :\n"
     "  • DP détaillé (3 exemples Back documentés ligne par ligne) : DP.pdf\n"
     "  • Dossier de Projet complet (20 pages) : dossier-projet.pdf\n"
@@ -621,25 +621,28 @@ def fill_documents_illustrant(doc):
     # row 3 = "Intitulé" + placeholder "Cliquez ici…"
     # rows 4+ = à remplir
     documents = [
-        "Code source du projet Reminder Famille — "
-            "github.com/Vladimir08880888/reminder-famille",
+        "Code source du projet Crew — "
+            "github.com/Vladimir08880888/crew",
         "Repo centralisé des dossiers AFPA — "
             "github.com/Vladimir08880888/vladimir-rodzaevski-dossiers-pros-DWWM",
         "Dossier de Projet complet (20 pages, 15 sections) — "
             "dossier-projet/dossier-projet.pdf",
         "Dossier Professionnel détaillé (3 exemples par AT) — "
             "dossier-professionnel/DP.pdf",
-        "Documentation API REST (30+ endpoints) — "
-            "dossier-projet/api-documentation.pdf",
-        "Document Sécurité OWASP — dossier-projet/securite.pdf",
-        "Charte graphique + Wireframes — dossier-projet/maquettes/",
-        "8 diagrammes UML/Merise (Mermaid) — dossier-projet/diagrammes/",
+        "Cahier des charges (sections 1-11, évolutions v2) — "
+            "dossier-projet/cahier-des-charges.md",
+        "Justification scientifique (12 références peer-reviewed) — "
+            "dossier-projet/annexes/JUSTIFICATION_SCIENTIFIQUE.md",
+        "Schéma BDD (Mermaid ERD) — "
+            "dossier-projet/annexes/SCHEMA_BDD.md",
+        "Manuel utilisateur (manager + équipier) — "
+            "dossier-projet/annexes/MANUEL_UTILISATEUR.md",
         "17 captures d'écran haute résolution — "
-            "reminder-famille/annexes/screenshots/",
-        "Suite de 57 tests d'intégration (100 % PASS) — "
-            "reminder-famille/tests/integration.sh",
-        "Slides de soutenance (PDF + HTML + PPTX) — "
-            "dossier-projet/slides.*",
+            "dossier-projet/annexes/screenshots/",
+        "Plan de tests (60+ scénarios Playwright) — "
+            "dossier-projet/annexes/PLAN_DE_TESTS.md",
+        "Trame de soutenance — "
+            "dossier-projet/soutenance.md",
     ]
     for i, doc_str in enumerate(documents):
         row_idx = 3 + i
