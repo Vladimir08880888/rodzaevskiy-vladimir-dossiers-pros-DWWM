@@ -455,13 +455,13 @@ def fill_header_table(doc):
         (3, PERSONAL["Prénom"]),
         (4, PERSONAL["Adresse"]),
     ]
+    # Structure colonnes : 0 = label (4 cm) | 1 = icône séparateur 0.4 cm |
+    # 2 = zone de saisie large (9 cm). On écrit la valeur dans la
+    # colonne 2 et on laisse la colonne 1 (icône wingding) intacte.
     for row_idx, value in fields:
         tcs = rows[row_idx].xpath('.//w:tc')
-        if len(tcs) >= 2:
-            set_cell_in_tc(tcs[1], value)
-        # Vider le placeholder SDT en col 2 si présent
         if len(tcs) >= 3:
-            set_cell_in_tc(tcs[2], '')
+            set_cell_in_tc(tcs[2], value)
 
 
 def fill_titre_pro(doc):
