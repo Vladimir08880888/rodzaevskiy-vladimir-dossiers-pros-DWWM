@@ -510,7 +510,7 @@ DIPLOMES = [
      "2012"),
     ("Titre Professionnel Développeur Web et Web Mobile",
      "AFPA Marseille (en cours)",
-     "2026"),
+     "2025–2026"),
 ]
 
 # ────────────────────────────────────────────────────────────────────────
@@ -1003,23 +1003,24 @@ def fill_documents_illustrant(doc):
     documents = [
         "Code source du projet Crew — "
             "github.com/Vladimir08880888/crew",
+        "Application déployée en production — "
+            "crew-planner-hazel.vercel.app",
         "Repo centralisé des dossiers AFPA — "
             "github.com/Vladimir08880888/vladimir-rodzaevski-dossiers-pros-DWWM",
-        "Dossier de Projet complet (20 pages, 15 sections) — "
-            "dossier-projet/dossier-projet.pdf",
-        "Dossier Professionnel détaillé (3 exemples par AT) — "
+        "Dossier Professionnel détaillé (3 exemples par AT, code commenté) — "
             "dossier-professionnel/DP.pdf",
-        "Cahier des charges (sections 1-11, évolutions v2) — "
+        "Cahier des charges (sections 1-11, évolutions v2 documentées) — "
             "dossier-projet/cahier-des-charges.md",
-        "Justification scientifique (12 références peer-reviewed) — "
+        "Justification scientifique (12 références peer-reviewed — INRS, "
+            "NIOSH, Convention HCR, OR economics) — "
             "dossier-projet/annexes/JUSTIFICATION_SCIENTIFIQUE.md",
-        "Schéma BDD (Mermaid ERD) — "
+        "Schéma BDD (Mermaid ERD + règles d'intégrité) — "
             "dossier-projet/annexes/SCHEMA_BDD.md",
         "Manuel utilisateur (manager + équipier) — "
             "dossier-projet/annexes/MANUEL_UTILISATEUR.md",
         "17 captures d'écran haute résolution — "
             "dossier-projet/annexes/screenshots/",
-        "Plan de tests (60+ scénarios Playwright) — "
+        "Plan de tests (60+ scénarios Playwright, 29/29 PASS sur v2) — "
             "dossier-projet/annexes/PLAN_DE_TESTS.md",
         "Trame de soutenance — "
             "dossier-projet/soutenance.md",
