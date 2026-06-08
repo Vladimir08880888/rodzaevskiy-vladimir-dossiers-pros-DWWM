@@ -34,7 +34,7 @@
 |---|---|---|
 | **2004** | Master 2 Économie et Gestion d'Entreprise | Russie — Moscou |
 | **2012** | Master 2 Commerce International — INSEEC | France — Paris |
-| 2026 | Titre Professionnel DWWM (en cours) | France — AFPA Marseille |
+| 2025–2026 | Titre Professionnel DWWM (en cours) | France — AFPA Marseille |
 
 ### 1.2 Parcours professionnel
 
@@ -42,7 +42,7 @@
 |---|---|---|
 | ~10 ans | Manager + serveur de salle | Restauration |
 | 3 ans | Croupier | Casino |
-| 2026 | Reconversion en cours | Développement web |
+| 2025–2026 | Reconversion en cours | Développement web |
 
 ### 1.3 Motivations de la reconversion
 
