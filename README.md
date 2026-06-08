@@ -43,6 +43,18 @@ Contenu :
 | Schéma BDD (Mermaid ERD)              | [`dossier-projet/annexes/SCHEMA_BDD.md`](./dossier-projet/annexes/SCHEMA_BDD.md) |
 | 17 captures d'écran                   | [`dossier-projet/annexes/screenshots/`](./dossier-projet/annexes/screenshots/) |
 
+### 💻 Code source — snapshot
+
+Le code complet de Crew est intégré dans le dépôt pour permettre au
+jury d'explorer le code sans accès externe :
+
+| Dossier                       | Lien                                                          |
+| ----------------------------- | ------------------------------------------------------------- |
+| Snapshot complet du code      | [`code/crew/`](./code/crew/) (10 MB, sans node_modules)        |
+| Back-end Node.js + Express    | [`code/crew/back/`](./code/crew/back/)                         |
+| Front-end React + Vite        | [`code/crew/front/`](./code/crew/front/)                       |
+| 12 migrations SQL versionnées | [`code/crew/back/migrations/`](./code/crew/back/migrations/)   |
+
 ---
 
 ## 💻 Projet présenté

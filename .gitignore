@@ -15,3 +15,12 @@ Thumbs.db
 
 # LibreOffice temp files
 *.odt
+
+# Code snapshot — ne pas tracker node_modules, builds, secrets
+code/crew/**/node_modules/
+code/crew/**/dist/
+code/crew/**/.env
+code/crew/**/.env.local
+code/crew/**/.env.*.local
+code/crew/**/*.log
+code/crew/**/.vercel/
