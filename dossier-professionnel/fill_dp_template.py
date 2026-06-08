@@ -37,6 +37,13 @@ AT1_INTITULE = "Développer la partie front-end d'une application web ou web mob
 AT1_EX_INTITULE = "Application Crew — planification d'équipe React 18 complète"
 
 AT1_TASKS = (
+    "Compétences couvertes (référentiel REAC DWWM — RNCP 37674) :\n"
+    "  • C1.1 — Maquetter une application (mobile-first, breakpoints)\n"
+    "  • C1.2 — Réaliser une interface utilisateur web statique et "
+    "adaptable (responsive, accessibilité WCAG AA)\n"
+    "  • C1.3 — Développer une interface utilisateur web dynamique "
+    "(Context API, hooks, état global)\n"
+    "  • C1.4 — Réaliser une interface avec un framework (React 18 + Vite)\n\n"
     "Dans le cadre du projet de fin de formation Crew (planification "
     "intelligente d'équipe pour la restauration), j'ai réalisé l'intégralité "
     "de la partie front-end de l'application. J'ai notamment :\n\n"
@@ -151,6 +158,14 @@ AT2_INTITULE = "Développer la partie back-end d'une application web ou web mobi
 AT2_EX_INTITULE = "Application Crew — API Node.js/Express sécurisée"
 
 AT2_TASKS = (
+    "Compétences couvertes (référentiel REAC DWWM — RNCP 37674) :\n"
+    "  • C2.1 — Créer une base de données (MCD/MLD/MPD via 12 migrations SQL)\n"
+    "  • C2.2 — Développer les composants d'accès aux données "
+    "(modèles mysql2 avec requêtes préparées, sans ORM)\n"
+    "  • C2.3 — Développer la partie back-end (Express, controllers, "
+    "validators, solver d'optimisation)\n"
+    "  • C2.4 — Mettre en œuvre des composants dans un framework "
+    "(Express middleware composable)\n\n"
     "Pour le même projet Crew, j'ai conçu et développé l'intégralité "
     "de la partie back-end : conception de la base de données, API REST "
     "sécurisée, et un solver de planning intelligent sous contraintes "
@@ -272,6 +287,10 @@ AT2_INFOS_COMPL = (
 AT1B_EX_INTITULE = "Application Crew — grille de planning hebdomadaire avec drag-and-drop"
 
 AT1B_TASKS = (
+    "Compétences couvertes :\n"
+    "  • C1.2 — Interface adaptable (grille scrollable horizontal mobile)\n"
+    "  • C1.3 — Interface dynamique (drag-and-drop HTML5 natif, rendu optimiste)\n"
+    "  • C1.4 — Framework React (composants + hooks)\n\n"
     "Toujours sur le projet Crew, j'ai conçu la page Planning qui est "
     "le cœur d'utilisation quotidien du manager. Il s'agit d'une grille "
     "(équipiers × jours de la semaine) où chaque cellule représente les "
@@ -338,6 +357,9 @@ AT1B_AVEC_QUI = AT1_AVEC_QUI
 AT1C_EX_INTITULE = "Application Crew — Modale Smart Planner avec densité prévue par service"
 
 AT1C_TASKS = (
+    "Compétences couvertes :\n"
+    "  • C1.3 — Interface dynamique (état contrôlé, useEffect, re-fetch live)\n"
+    "  • C1.4 — Framework React (composants composables, react-i18next)\n\n"
     "La modale Smart Planner est le composant le plus dense fonctionnellement "
     "de l'application : c'est là que le manager déclare la densité prévue "
     "de chaque service de la semaine et obtient en retour une proposition "
@@ -389,6 +411,10 @@ AT1C_AVEC_QUI = AT1_AVEC_QUI
 AT2B_EX_INTITULE = "Application Crew — Authentification JWT et middlewares composables"
 
 AT2B_TASKS = (
+    "Compétences couvertes :\n"
+    "  • C2.3 — Back-end sécurisé (JWT, bcrypt, rate-limiting)\n"
+    "  • C2.4 — Middleware composable (authRequired → requireFamilyMember "
+    "→ requireAdmin) dans Express\n\n"
     "Le système d'authentification de Crew protège toutes les routes "
     "applicatives. J'ai conçu l'enchaînement complet — du hachage du "
     "mot de passe à l'invalidation côté client — sans cookie pour "
@@ -445,6 +471,11 @@ AT2B_AVEC_QUI = AT2_AVEC_QUI
 AT2C_EX_INTITULE = "Application Crew — Génération d'un flux iCalendar RFC 5545"
 
 AT2C_TASKS = (
+    "Compétences couvertes :\n"
+    "  • C2.2 — Composants d'accès aux données (lecture shifts + user "
+    "via token URL pour le flux iCal)\n"
+    "  • C2.3 — Back-end (génération d'un flux RFC 5545 conforme avec "
+    "VALARM pour notifications natives)\n\n"
     "Pour permettre à chaque équipier de recevoir ses shifts directement "
     "dans son application Calendrier native (iPhone Calendar, Google "
     "Calendar, Outlook), j'ai implémenté la génération d'un flux iCalendar "
@@ -983,7 +1014,7 @@ def fill_sommaire(doc):
     write_cell(13, -1, "19")
     write_cell(14, -1, "20")
     write_cell(15, 0, "Annexes — 6 captures d'écran représentatives "
-                      "de l'application Crew (pages 21-26)")
+                      "de l'application Crew (pages 21-27)")
     write_cell(15, -1, "21")
 
 
