@@ -740,6 +740,74 @@ def fill_documents_illustrant(doc):
         set_cell_in_tc(tcs[0], doc_str)
 
 # ────────────────────────────────────────────────────────────────────────
+# Captures d'écran à insérer dans la section « Annexes » du DP
+# ────────────────────────────────────────────────────────────────────────
+SCREENSHOTS = [
+    ("04-dashboard-manager.png",
+     "Tableau de bord du manager — heures planifiées par équipier vs cibles, "
+     "couverture par poste, alertes santé du service."),
+    ("07-planning-grid.png",
+     "Grille de planning hebdomadaire — équipiers groupés par poste "
+     "(cuisine, salle), ligne « Extras » avec déficits à couvrir, "
+     "indicateurs de couverture par service en en-tête, masse salariale "
+     "prévisionnelle affichée."),
+    ("08-smart-planner-modal.png",
+     "Modale Smart Planner — tableau (jour × service) de densité prévue "
+     "avec presets Calme 0,5 / Normal 1,0 / Chargé 1,3, couverture par "
+     "service et par poste, liste des services non couverts."),
+    ("06-member-edit-modal.png",
+     "Modale d'édition équipier — 5 profils nommés (Apprenti → Référent), "
+     "polyvalence multi-postes, heures cibles, permissions."),
+    ("09-stats-charts.png",
+     "Page Statistiques — graphiques Chart.js (heures planifiées vs cibles, "
+     "couverture par poste, évolution hebdomadaire)."),
+    ("15-mobile-dashboard.png",
+     "Vue mobile responsive — application utilisable sur smartphone."),
+]
+
+
+def append_visual_annexes(doc):
+    """Ajoute les captures d'écran représentatives sous la section « Annexes ».
+
+    La table 9 (« Annexes ») existe en fin de document avec un en-tête
+    mais aucun contenu. On ajoute les screenshots juste APRÈS cette table,
+    en pleine largeur (6 inches ≈ 15 cm) avec une légende italique.
+    """
+    from docx.shared import Inches, Pt
+    from docx.enum.text import WD_ALIGN_PARAGRAPH
+
+    screens_dir = (DST.parent.parent / "dossier-projet" / "annexes"
+                   / "screenshots")
+    if not screens_dir.exists():
+        # Fallback : essayer le repo crew si on est dans son arborescence.
+        return
+
+    # Petit titre de section avant les images.
+    h = doc.add_paragraph()
+    r = h.add_run("Captures d'écran représentatives de l'application Crew")
+    r.bold = True
+    r.font.size = Pt(13)
+    h.alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+    for fname, caption in SCREENSHOTS:
+        img = screens_dir / fname
+        if not img.exists():
+            continue
+        # Image centrée.
+        p = doc.add_paragraph()
+        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        run = p.add_run()
+        run.add_picture(str(img), width=Inches(6))
+        # Légende italique sous l'image.
+        cap = doc.add_paragraph()
+        cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        crun = cap.add_run(caption)
+        crun.italic = True
+        crun.font.size = Pt(9)
+        doc.add_paragraph()  # respiration verticale
+
+
+# ────────────────────────────────────────────────────────────────────────
 # MAIN
 # ────────────────────────────────────────────────────────────────────────
 
@@ -799,6 +867,8 @@ def main():
     # Supprimer aussi les sauts de page « extra » entre AT1↔AT2 et
     # AT2↔Titres-diplômes pour éviter les pages vides.
     remove_excess_page_breaks(doc)
+
+    append_visual_annexes(doc)
 
     doc.save(str(DST))
     print(f"✓ Généré : {DST}")
