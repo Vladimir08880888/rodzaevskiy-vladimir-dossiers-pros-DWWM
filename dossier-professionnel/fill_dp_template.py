@@ -100,7 +100,7 @@ AT1_MOYENS = (
     "approche glassmorphism + dark mode natif\n\n"
     "Outils :\n"
     "  • Visual Studio Code\n"
-    "  • Git + GitHub (12 commits par migration tracée)\n"
+    "  • Git + GitHub (commits réguliers, branche par feature)\n"
     "  • Firefox + Chromium (DevTools, accessibility audit, responsive mode)\n"
     "  • Playwright 1.60 pour les tests E2E\n"
     "  • Postman et curl pour tester les appels API\n\n"
@@ -543,7 +543,7 @@ def set_cell_text(cell, text, *, bold=False, preserve_first_run=True):
 def fill_example_table(table, intitule_at, intitule_ex,
                        tasks, moyens, avec_qui,
                        nom_ent, service, periode_du, periode_au,
-                       infos_compl=""):
+                       infos_compl="", exemple_num=1):
     """
     Remplit un tableau « exemple de pratique professionnelle ».
     Structure du tableau (33 rows) :
@@ -573,9 +573,12 @@ def fill_example_table(table, intitule_at, intitule_ex,
         # remplacer le texte « Cliquez ici … » dans la 3ème cellule
         set_cell_in_tc(tcs[-1], intitule_at, bold=True)
 
-    # row 1 — Exemple n°X : 2ème ou 3ème colonne
+    # row 1 — Exemple n°X : 1ère colonne = libellé numéroté,
+    # dernière colonne = intitulé de l'exemple.
     tcs = cell_tcs_at(1)
     if len(tcs) >= 2:
+        # Met à jour le libellé « Exemple n°1 » selon exemple_num.
+        set_cell_in_tc(tcs[0], f"Exemple n°{exemple_num}", bold=True)
         set_cell_in_tc(tcs[-1], intitule_ex, bold=True)
 
     # Section 1 : « 1. Décrivez les tâches » → écrire dans rows 5-9
@@ -805,8 +808,12 @@ def fill_declaration(doc):
             set_paragraph_text(p, "")
             continue
         # « Je soussigné(e) [prénom et nom] , » → ligne pointillée
+        # On retire la virgule trainante du modèle qui produisait une
+        # « ,........... » disgracieuse après le nom.
         if 'Je soussigné' in full and '[prénom et nom]' in full:
             new = full.replace('[prénom et nom]', f' {LINE} ')
+            # Supprime la virgule isolée en fin de ligne si présente.
+            new = new.rstrip().rstrip(',').rstrip() + ' '
             set_paragraph_text(p, new)
             continue
         # « Fait à … le … » : la ligne contient déjà nos pointillés
@@ -945,46 +952,32 @@ def fill_sommaire(doc):
     #   p 20 Documents illustrant
     #   p 21 Annexes (captures d'écran)
 
+    # Numéros mesurés sur le PDF (26 pages après suppression page blanche).
     # AT1 (rows 2-5)
     write_cell(2, 0, AT1_INTITULE);          write_cell(2, -1, "4")
     write_cell(3, 1, AT1_EX_INTITULE);       write_cell(3, -1, "4")
-    write_cell(4, 1, AT1B_EX_INTITULE);      write_cell(4, -1, "8")
-    write_cell(5, 1, AT1C_EX_INTITULE);      write_cell(5, -1, "10")
+    write_cell(4, 1, AT1B_EX_INTITULE);      write_cell(4, -1, "7")
+    write_cell(5, 1, AT1C_EX_INTITULE);      write_cell(5, -1, "9")
 
     # AT2 (rows 7-10)
-    write_cell(7, 0, AT2_INTITULE);          write_cell(7, -1, "12")
-    write_cell(8, 1, AT2_EX_INTITULE);       write_cell(8, -1, "12")
-    write_cell(9, 1, AT2B_EX_INTITULE);      write_cell(9, -1, "14")
-    write_cell(10, 1, AT2C_EX_INTITULE);     write_cell(10, -1, "16")
+    write_cell(7, 0, AT2_INTITULE);          write_cell(7, -1, "10")
+    write_cell(8, 1, AT2_EX_INTITULE);       write_cell(8, -1, "10")
+    write_cell(9, 1, AT2B_EX_INTITULE);      write_cell(9, -1, "13")
+    write_cell(10, 1, AT2C_EX_INTITULE);     write_cell(10, -1, "15")
 
-    # Anciennes lignes AT3/AT4 « Non applicable » repurposées en sous-TOC.
-    # Rows 12-15 : sous-sections détaillées (Description+code, Moyens, etc.).
-    write_cell(12, 0, "Sections détaillées des Activités-Types")
-    # La section débute à la première sous-section listée (AT1 ex 1, p. 4).
-    write_cell(12, -1, "4")
-    write_cell(13, 1, "AT1 ex 1 — Description + extrait de code AuthContext")
-    write_cell(13, -1, "4")
-    write_cell(14, 1, "AT2 ex 1 — Description du solver HCR + extrait du filtre")
-    write_cell(14, -1, "12")
-    write_cell(15, 1, "AT2 ex 2 — Authentification JWT + middleware authRequired")
-    write_cell(15, -1, "14")
-
-    # Rows 17-20 : détail de la section Annexes (6 captures d'écran).
-    write_cell(17, 0, "Détail des captures d'écran (Annexes)")
-    write_cell(17, -1, "21")
-    write_cell(18, 1, "Capture 1 — Tableau de bord manager / Grille de planning")
-    write_cell(18, -1, "21")
-    write_cell(19, 1, "Capture 2 — Modale Smart Planner / Édition équipier (5 profils)")
-    write_cell(19, -1, "23")
-    write_cell(20, 1, "Capture 3 — Statistiques Chart.js / Vue mobile responsive")
-    write_cell(20, -1, "25")
+    # AT3 / AT4 « Non applicable » — laissées vides (rows 12-15, 17-20).
+    # On évite le doublon avec les exemples listés au-dessus.
+    for r in (12, 13, 14, 15, 17, 18, 19, 20):
+        write_cell(r, 0, "")
+        write_cell(r, 1, "—")
+        write_cell(r, -1, "—")
 
     # Diplômes / Déclaration / Documents / Annexes (rows 22-25)
     write_cell(22, -1, "18")
     write_cell(23, -1, "19")
     write_cell(24, -1, "20")
     write_cell(25, 0, "Annexes — 6 captures d'écran représentatives "
-                      "de l'application Crew")
+                      "de l'application Crew (pages 21-26)")
     write_cell(25, -1, "21")
 
 
@@ -1038,25 +1031,29 @@ def fill_documents_illustrant(doc):
 # Captures d'écran à insérer dans la section « Annexes » du DP
 # ────────────────────────────────────────────────────────────────────────
 SCREENSHOTS = [
-    ("04-dashboard-manager.png",
+    ("04-dashboard-manager.png", 5.8,
      "Tableau de bord du manager — heures planifiées par équipier vs cibles, "
      "couverture par poste, alertes santé du service."),
-    ("07-planning-grid.png",
+    ("07-planning-grid.png", 5.8,
      "Grille de planning hebdomadaire — équipiers groupés par poste "
      "(cuisine, salle), ligne « Extras » avec déficits à couvrir, "
      "indicateurs de couverture par service en en-tête, masse salariale "
      "prévisionnelle affichée."),
-    ("08-smart-planner-modal.png",
+    ("08-smart-planner-modal.png", 5.8,
      "Modale Smart Planner — tableau (jour × service) de densité prévue "
      "avec presets Calme 0,5 / Normal 1,0 / Chargé 1,3, couverture par "
      "service et par poste, liste des services non couverts."),
-    ("06-member-edit-modal.png",
+    ("06-member-edit-modal.png", 5.8,
      "Modale d'édition équipier — 5 profils nommés (Apprenti → Référent), "
      "polyvalence multi-postes, heures cibles, permissions."),
-    ("09-stats-charts.png",
+    ("09-stats-charts.png", 5.8,
      "Page Statistiques — graphiques Chart.js (heures planifiées vs cibles, "
      "couverture par poste, évolution hebdomadaire)."),
-    ("15-mobile-dashboard.png",
+    # Capture mobile : largeur très réduite (1,5 inch) car le smartphone
+    # est en format portrait étroit (390×2606 px). Sans réduction forte,
+    # l'image déborde du bas de page et la légende part sur une page
+    # blanche orpheline.
+    ("15-mobile-dashboard.png", 1.5,
      "Vue mobile responsive — application utilisable sur smartphone."),
 ]
 
@@ -1102,22 +1099,29 @@ def append_visual_annexes(doc):
     r.font.size = Pt(13)
     h.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
-    for fname, caption in SCREENSHOTS:
+    for entry in SCREENSHOTS:
+        if len(entry) == 3:
+            fname, width_in, caption = entry
+        else:
+            fname, caption = entry
+            width_in = 5.8
         img = screens_dir / fname
         if not img.exists():
             continue
-        # Image centrée.
+        # Image + légende dans un même paragraphe (séparées par un saut
+        # de ligne intra-paragraphe), pour que LibreOffice ne sépare
+        # jamais la légende de son image sur deux pages.
         p = doc.add_paragraph()
         p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        # Garder le paragraphe entier groupé avec le suivant.
+        p.paragraph_format.keep_with_next = True
         run = p.add_run()
-        run.add_picture(str(img), width=Inches(6))
-        # Légende italique sous l'image.
-        cap = doc.add_paragraph()
-        cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        crun = cap.add_run(caption)
-        crun.italic = True
-        crun.font.size = Pt(9)
-        doc.add_paragraph()  # respiration verticale
+        run.add_picture(str(img), width=Inches(width_in))
+        # Saut de ligne intra-paragraphe puis légende italique.
+        run.add_break()
+        cap_run = p.add_run(caption)
+        cap_run.italic = True
+        cap_run.font.size = Pt(9)
 
 
 # ────────────────────────────────────────────────────────────────────────
@@ -1150,7 +1154,7 @@ def main():
         service=AT1_SERVICE,
         periode_du=AT1_PERIODE_DU,
         periode_au=AT1_PERIODE_AU,
-        infos_compl=AT1_INFOS_COMPL,
+        infos_compl=AT1_INFOS_COMPL, exemple_num=1,
     )
     fill_example_table(
         at1_ex2,
@@ -1163,7 +1167,7 @@ def main():
         service=AT1_SERVICE,
         periode_du=AT1_PERIODE_DU,
         periode_au=AT1_PERIODE_AU,
-        infos_compl="",
+        infos_compl="", exemple_num=2,
     )
     fill_example_table(
         at1_ex3,
@@ -1176,7 +1180,7 @@ def main():
         service=AT1_SERVICE,
         periode_du=AT1_PERIODE_DU,
         periode_au=AT1_PERIODE_AU,
-        infos_compl="",
+        infos_compl="", exemple_num=3,
     )
 
     # AT2 → Table 7 (après les 2 clones AT1) + 2 clones.
@@ -1196,7 +1200,7 @@ def main():
         service=AT2_SERVICE,
         periode_du=AT2_PERIODE_DU,
         periode_au=AT2_PERIODE_AU,
-        infos_compl=AT2_INFOS_COMPL,
+        infos_compl=AT2_INFOS_COMPL, exemple_num=1,
     )
     fill_example_table(
         at2_ex2,
@@ -1209,7 +1213,7 @@ def main():
         service=AT2_SERVICE,
         periode_du=AT2_PERIODE_DU,
         periode_au=AT2_PERIODE_AU,
-        infos_compl="",
+        infos_compl="", exemple_num=2,
     )
     fill_example_table(
         at2_ex3,
@@ -1222,7 +1226,7 @@ def main():
         service=AT2_SERVICE,
         periode_du=AT2_PERIODE_DU,
         periode_au=AT2_PERIODE_AU,
-        infos_compl="",
+        infos_compl="", exemple_num=3,
     )
 
     # AT3 → laissée en place temporairement pour stabilité d'indexation
