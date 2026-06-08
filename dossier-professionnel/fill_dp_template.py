@@ -1260,6 +1260,93 @@ def append_visual_annexes(doc):
         cap_run.font.size = Pt(9)
 
 
+def force_single_sided_footer(doc):
+    """Sans-op au niveau python-docx : la réécriture des footers se
+    fait après save() en manipulation ZIP directe — voir
+    rewrite_footers_in_zip(). Cette indirection évite que python-docx
+    ne (re)crée des références footer type="even"/type="first" lors
+    de l'accès aux propriétés correspondantes des Section.
+    """
+    pass
+
+
+# Pied-de-page propre : « Page <field PAGE> » aligné à droite, gris.
+_FOOTER_CLEAN_XML = (
+    '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    '<w:ftr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'
+    '<w:p>'
+    '<w:pPr>'
+    '<w:pStyle w:val="Pieddepage"/>'
+    '<w:jc w:val="right"/>'
+    '<w:rPr><w:b/><w:color w:val="7F7F7F"/><w:sz w:val="18"/></w:rPr>'
+    '</w:pPr>'
+    '<w:r>'
+    '<w:rPr><w:b/><w:color w:val="7F7F7F"/><w:sz w:val="18"/></w:rPr>'
+    '<w:t xml:space="preserve">Page </w:t>'
+    '</w:r>'
+    '<w:r>'
+    '<w:rPr><w:b/><w:color w:val="7F7F7F"/><w:sz w:val="18"/></w:rPr>'
+    '<w:fldChar w:fldCharType="begin"/>'
+    '</w:r>'
+    '<w:r>'
+    '<w:rPr><w:b/><w:color w:val="7F7F7F"/><w:sz w:val="18"/></w:rPr>'
+    '<w:instrText xml:space="preserve"> PAGE   \\* MERGEFORMAT </w:instrText>'
+    '</w:r>'
+    '<w:r>'
+    '<w:rPr><w:b/><w:color w:val="7F7F7F"/><w:sz w:val="18"/></w:rPr>'
+    '<w:fldChar w:fldCharType="end"/>'
+    '</w:r>'
+    '</w:p>'
+    '</w:ftr>'
+)
+
+
+def rewrite_footers_in_zip(docx_path):
+    """Remplace tous les footerN.xml par un footer « Page X » à droite
+    et supprime les <w:footerReference type="even"|"first"> + le flag
+    <w:evenAndOddHeaders/> dans document.xml et settings.xml.
+
+    Manipulation directe du ZIP : on travaille sur le DOCX déjà
+    sauvegardé pour court-circuiter la création parasite de footers
+    par python-docx.
+    """
+    import zipfile
+    import shutil
+    import re
+    from pathlib import Path
+
+    src = Path(docx_path)
+    tmp = src.with_suffix('.tmp.docx')
+
+    with zipfile.ZipFile(src, 'r') as zin, \
+            zipfile.ZipFile(tmp, 'w', zipfile.ZIP_DEFLATED) as zout:
+        for item in zin.infolist():
+            data = zin.read(item.filename)
+            if (item.filename.startswith('word/footer')
+                    and item.filename.endswith('.xml')):
+                data = _FOOTER_CLEAN_XML.encode('utf-8')
+            elif item.filename == 'word/document.xml':
+                text = data.decode('utf-8')
+                # Supprimer footerReference type="even" et type="first"
+                text = re.sub(
+                    r'<w:footerReference[^/]*?w:type="(?:even|first)"[^/]*?/>',
+                    '', text)
+                # Supprimer headerReference type="even" (à droite par
+                # défaut, le header reste sur le pied paire/impaire si
+                # le flag existe encore — on l'élimine aussi).
+                text = re.sub(
+                    r'<w:headerReference[^/]*?w:type="even"[^/]*?/>',
+                    '', text)
+                data = text.encode('utf-8')
+            elif item.filename == 'word/settings.xml':
+                text = data.decode('utf-8')
+                text = re.sub(r'<w:evenAndOddHeaders\s*/>', '', text)
+                data = text.encode('utf-8')
+            zout.writestr(item, data)
+
+    shutil.move(tmp, src)
+
+
 def strip_footer_version_string(doc):
     """Supprime « DOSSIER PROFESSIONNEL-Version Traitement de texte –
     Version du 11/09/2017 » des pieds-de-page (toutes sections, toutes
@@ -1423,9 +1510,18 @@ def main():
     # du template (sans intérêt pour le jury, encombre visuellement).
     strip_footer_version_string(doc)
 
+    # Impression recto seul : numéro de page toujours à droite, donc
+    # désactiver le mode « pages paires/impaires différentes ».
+    force_single_sided_footer(doc)
+
     append_visual_annexes(doc)
 
     doc.save(str(DST))
+
+    # Post-traitement ZIP : nettoyer les footers + références
+    # pair/première pour avoir « Page N » à droite partout.
+    rewrite_footers_in_zip(str(DST))
+
     print(f"✓ Généré : {DST}")
     print(f"  Taille  : {DST.stat().st_size:,} octets")
 
