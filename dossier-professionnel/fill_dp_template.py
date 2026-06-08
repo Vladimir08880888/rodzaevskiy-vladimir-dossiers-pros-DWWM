@@ -921,7 +921,8 @@ def fill_sommaire(doc):
     # Anciennes lignes AT3/AT4 « Non applicable » repurposées en sous-TOC.
     # Rows 12-15 : sous-sections détaillées (Description+code, Moyens, etc.).
     write_cell(12, 0, "Sections détaillées des Activités-Types")
-    write_cell(12, -1, "—")
+    # La section débute à la première sous-section listée (AT1 ex 1, p. 4).
+    write_cell(12, -1, "4")
     write_cell(13, 1, "AT1 ex 1 — Description + extrait de code AuthContext")
     write_cell(13, -1, "4")
     write_cell(14, 1, "AT2 ex 1 — Description du solver HCR + extrait du filtre")
