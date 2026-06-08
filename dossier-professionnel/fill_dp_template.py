@@ -965,12 +965,24 @@ def fill_sommaire(doc):
     write_cell(9, 1, AT2B_EX_INTITULE);      write_cell(9, -1, "13")
     write_cell(10, 1, AT2C_EX_INTITULE);     write_cell(10, -1, "15")
 
-    # AT3 / AT4 « Non applicable » — laissées vides (rows 12-15, 17-20).
-    # On évite le doublon avec les exemples listés au-dessus.
-    for r in (12, 13, 14, 15, 17, 18, 19, 20):
+    # AT3 et AT4 sont non applicables (le titre DWWM ne comporte que
+    # 2 activités-types). On met un libellé explicite sur la ligne de
+    # titre pour éviter les rangées « — » que le jury pourrait lire
+    # comme des champs oubliés à remplir.
+    write_cell(12, 0, "Activité-type n°3 — non applicable (le titre "
+                       "DWWM ne comporte que 2 activités-types)")
+    write_cell(12, -1, "—")
+    for r in (13, 14, 15):
         write_cell(r, 0, "")
-        write_cell(r, 1, "—")
-        write_cell(r, -1, "—")
+        write_cell(r, 1, "")
+        write_cell(r, -1, "")
+
+    write_cell(17, 0, "Activité-type n°4 — non applicable")
+    write_cell(17, -1, "—")
+    for r in (18, 19, 20):
+        write_cell(r, 0, "")
+        write_cell(r, 1, "")
+        write_cell(r, -1, "")
 
     # Diplômes / Déclaration / Documents / Annexes (rows 22-25)
     write_cell(22, -1, "18")
