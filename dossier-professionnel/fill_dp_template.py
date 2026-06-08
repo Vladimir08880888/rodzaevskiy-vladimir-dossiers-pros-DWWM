@@ -934,6 +934,52 @@ def remove_excess_page_breaks(doc):
             prev = prev.getprevious()
 
 
+def collapse_double_page_breaks(doc):
+    """Supprime le saut de page orphelin entre AT2 ex3 et Titres-diplômes.
+
+    Le template AFPA contenait des sauts de page liés aux activités-type
+    AT3/AT4 désormais supprimées. Il en reste un juste avant « Titres,
+    diplômes » qui crée une page p.20 entièrement vide. On le retire
+    chirurgicalement (sans toucher aux sauts qui séparent AT1↔AT2, ni
+    aux sauts insérés par clone_example_table pour les exemples).
+    """
+    from lxml import etree
+    body = doc.element.body
+    children = list(body)
+
+    def is_p_with_pgbr(el):
+        return (etree.QName(el).localname == 'p'
+                and bool(el.xpath('.//w:br[@w:type="page"]')))
+
+    # Repérer la table « Titres, diplômes »
+    titres_idx = None
+    for i, child in enumerate(children):
+        if etree.QName(child).localname != 'tbl':
+            continue
+        txt = ''.join(child.xpath('.//w:t/text()'))[:60]
+        if 'Titres, diplômes' in txt:
+            titres_idx = i
+            break
+    if titres_idx is None:
+        return
+
+    # Remonter jusqu'à la table précédente et nettoyer le gap.
+    prev_tbl_idx = None
+    for j in range(titres_idx - 1, -1, -1):
+        if etree.QName(children[j]).localname == 'tbl':
+            prev_tbl_idx = j
+            break
+    if prev_tbl_idx is None:
+        return
+
+    gap_indices = list(range(prev_tbl_idx + 1, titres_idx))
+    pgbr_in_gap = [k for k in gap_indices if is_p_with_pgbr(children[k])]
+    for k in pgbr_in_gap:
+        p = children[k]
+        if p.getparent() is not None:
+            p.getparent().remove(p)
+
+
 def remove_at3_section(doc):
     """Supprime la table AT3 (Activité-type 3) + son saut de page précédent.
 
@@ -997,34 +1043,33 @@ def fill_sommaire(doc):
             return
         set_cell_in_tc(tcs[col_idx], text)
 
-    # Numéros de page mesurés sur le PDF généré avec 3 exemples par AT.
-    # Layout courant (27 pages) :
+    # Numéros mesurés sur le PDF final (29 pages, layout v2026-06) :
     #   p 1  Identité
     #   p 2  Présentation du dossier
     #   p 3  Sommaire
-    #   p 4  AT1 ex 1 (front Crew React)
-    #   p 8  AT1 ex 2 (Planning drag-and-drop)
-    #   p 10 AT1 ex 3 (Smart Planner modale)
-    #   p 12 AT2 ex 1 (Solver HCR)
-    #   p 14 AT2 ex 2 (Auth JWT)
-    #   p 16 AT2 ex 3 (iCalendar)
-    #   p 18 Titres, diplômes
-    #   p 19 Déclaration sur l'honneur
-    #   p 20 Documents illustrant
-    #   p 21 Annexes (captures d'écran)
+    #   p 4  Titre « EXEMPLES DE PRATIQUE PROFESSIONNELLE »
+    #   p 5  AT1 ex 1 (front Crew React 18 + AuthContext)
+    #   p 8  AT1 ex 2 (grille Planning + drag-and-drop)
+    #   p 11 AT1 ex 3 (Smart Planner modale)
+    #   p 13 AT2 ex 1 (Solver HCR Node.js/Express)
+    #   p 16 AT2 ex 2 (Auth JWT + middlewares)
+    #   p 18 AT2 ex 3 (iCalendar RFC 5545)
+    #   p 20 Titres, diplômes
+    #   p 21 Déclaration sur l'honneur
+    #   p 22 Documents illustrant la pratique
+    #   p 23 Annexes (titre) + p24-29 captures d'écran
 
-    # Numéros mesurés sur le PDF (26 pages après suppression page blanche).
     # AT1 (rows 2-5)
-    write_cell(2, 0, AT1_INTITULE);          write_cell(2, -1, "4")
-    write_cell(3, 1, AT1_EX_INTITULE);       write_cell(3, -1, "4")
-    write_cell(4, 1, AT1B_EX_INTITULE);      write_cell(4, -1, "7")
-    write_cell(5, 1, AT1C_EX_INTITULE);      write_cell(5, -1, "9")
+    write_cell(2, 0, AT1_INTITULE);          write_cell(2, -1, "5")
+    write_cell(3, 1, AT1_EX_INTITULE);       write_cell(3, -1, "5")
+    write_cell(4, 1, AT1B_EX_INTITULE);      write_cell(4, -1, "8")
+    write_cell(5, 1, AT1C_EX_INTITULE);      write_cell(5, -1, "11")
 
     # AT2 (rows 7-10)
-    write_cell(7, 0, AT2_INTITULE);          write_cell(7, -1, "10")
-    write_cell(8, 1, AT2_EX_INTITULE);       write_cell(8, -1, "10")
-    write_cell(9, 1, AT2B_EX_INTITULE);      write_cell(9, -1, "13")
-    write_cell(10, 1, AT2C_EX_INTITULE);     write_cell(10, -1, "15")
+    write_cell(7, 0, AT2_INTITULE);          write_cell(7, -1, "13")
+    write_cell(8, 1, AT2_EX_INTITULE);       write_cell(8, -1, "13")
+    write_cell(9, 1, AT2B_EX_INTITULE);      write_cell(9, -1, "16")
+    write_cell(10, 1, AT2C_EX_INTITULE);     write_cell(10, -1, "18")
 
     # AT3 et AT4 sont non applicables au titre DWWM. On supprime
     # entièrement les 10 rangées correspondantes (11-20) du sommaire
@@ -1040,12 +1085,12 @@ def fill_sommaire(doc):
     # Diplômes / Déclaration / Documents / Annexes — après suppression
     # des 10 rangées AT3/AT4 (11-20), ces rangées sont désormais en
     # indices 12, 13, 14, 15 (au lieu de 22-25).
-    write_cell(12, -1, "18")
-    write_cell(13, -1, "19")
-    write_cell(14, -1, "20")
+    write_cell(12, -1, "20")  # Titres, diplômes
+    write_cell(13, -1, "21")  # Déclaration sur l'honneur
+    write_cell(14, -1, "22")  # Documents illustrant
     write_cell(15, 0, "Annexes — 6 captures d'écran représentatives "
-                      "de l'application Crew (pages 21-27)")
-    write_cell(15, -1, "21")
+                      "de l'application Crew (pages 24-29)")
+    write_cell(15, -1, "23")
 
 
 def fill_documents_illustrant(doc):
@@ -1127,19 +1172,33 @@ SCREENSHOTS = [
 
 def clone_example_table(doc, source_table_idx):
     """Clone une table d'exemple (Table 4 ou 5) et l'insère juste après
-    la source. Retourne le nouvel objet Table python-docx.
+    la source, précédée d'un saut de page. Retourne le nouvel objet Table
+    python-docx.
 
     Stratégie : deepcopy de l'élément <w:tbl> source puis insertion via
     le parent body element. Tous les indices doc.tables[N] postérieurs
     glissent de +1.
+
+    Le saut de page inséré juste avant la clone empêche LibreOffice de
+    coincer les premières lignes (en-tête « Activité-type X / Exemple
+    n°Y / intitulé / Compétences couvertes ») en bas de la page
+    précédente, en laissant flotter le corps en haut de la suivante.
     """
     from copy import deepcopy
+    from docx.oxml.ns import qn
+    from docx.oxml import OxmlElement
     source = doc.tables[source_table_idx]
     src_el = source._tbl
     new_el = deepcopy(src_el)
-    # On insère juste après la source (et son éventuel paragraphe suivant).
     src_el.addnext(new_el)
-    # Retrouver le nouvel objet Table parmi doc.tables.
+    # Saut de page entre la source et la clone : <w:p><w:r><w:br type=page/></w:r></w:p>
+    pb_p = OxmlElement('w:p')
+    pb_r = OxmlElement('w:r')
+    pb_br = OxmlElement('w:br')
+    pb_br.set(qn('w:type'), 'page')
+    pb_r.append(pb_br)
+    pb_p.append(pb_r)
+    new_el.addprevious(pb_p)
     return doc.tables[source_table_idx + 1]
 
 
@@ -1314,10 +1373,15 @@ def main():
     # provoque des en-têtes coupés en bas de page (le titre « Activité-type 2 »
     # se retrouvait par ex. en bas de la page 10 au lieu d'ouvrir la 11).
     # On laisse chaque table d'exemple démarrer en haut de sa propre page.
-
-    # S'assurer que la section principale « Exemples de pratique
-    # professionnelle » démarre en haut d'une nouvelle page.
-    ensure_page_break_before(doc, "Exemples de pratique")
+    #
+    # Le template AFPA contient déjà un saut de section avant le titre
+    # « EXEMPLES DE PRATIQUE PROFESSIONNELLE » — pas besoin d'en forcer
+    # un supplémentaire (sinon page blanche p.4).
+    #
+    # En revanche, le template comportait des doubles sauts de page
+    # destinés à séparer AT3/AT4 (qu'on a supprimés) — d'où une p.20
+    # vide juste avant « Titres, diplômes ». On consolide.
+    collapse_double_page_breaks(doc)
 
     append_visual_annexes(doc)
 
