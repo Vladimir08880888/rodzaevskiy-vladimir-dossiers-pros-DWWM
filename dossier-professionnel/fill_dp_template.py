@@ -765,24 +765,63 @@ def fill_diplomes(doc):
 
 
 def fill_declaration(doc):
-    """Paragraphes (pas tableau) pour la déclaration sur l'honneur.
+    """Paragraphes de la déclaration sur l'honneur — laissés vides
+    intentionnellement.
 
-    Ces paragraphes sont en dehors des tableaux. On les modifie via
-    doc.paragraphs.
+    Le candidat imprime le DP et REMPLIT À LA MAIN sa déclaration
+    (nom, ville, date). On remplace donc tous les placeholders du
+    modèle (« [prénom et nom] », « [date à compléter] »,
+    « Cliquez ici pour taper du texte », « Cliquez ici pour choisir
+    une date ») par des lignes de pointillés ou par du vide.
     """
+    from docx.oxml.ns import qn
+    LINE = "................................................"
+    SHORT_LINE = ".................."
+
+    def collapse_runs_text(paragraph):
+        """Renvoie le texte complet d'un paragraphe (tous w:t concaténés)."""
+        return ''.join(t.text or '' for t in paragraph._p.iter(qn('w:t')))
+
+    def set_paragraph_text(paragraph, new_text):
+        """Remplace le contenu textuel du paragraphe : vide tous les
+        w:t existants sauf le premier, qui reçoit `new_text`."""
+        ts = list(paragraph._p.iter(qn('w:t')))
+        if not ts:
+            return
+        ts[0].text = new_text
+        for t in ts[1:]:
+            t.text = ''
+
     for p in doc.paragraphs:
-        txt = p.text
-        if 'Je soussigné' in txt:
-            # remplacer [prénom et nom] par le vrai nom
-            for r in p.runs:
-                if '[prénom et nom]' in r.text:
-                    r.text = r.text.replace('[prénom et nom]',
-                                            'Vladimir RODZAEVSKIY')
-        elif txt.startswith('Fait à'):
-            # remplir Fait à Marseille le ...
-            for r in p.runs:
-                if r.text.strip() == 'Fait à':
-                    r.text = 'Fait à Marseille le [date à compléter par le candidat]'
+        full = collapse_runs_text(p)
+        # Paragraphes contenant uniquement des placeholders SDT
+        # (« Cliquez ici pour taper du texte. » et/ou « Cliquez ici pour
+        # choisir une date » répétés) → on vide tous les w:t.
+        cleaned = full
+        for ph in ("Cliquez ici pour taper du texte.",
+                   "Cliquez ici pour choisir une date"):
+            cleaned = cleaned.replace(ph, "")
+        if not cleaned.strip() and 'Cliquez ici' in full:
+            set_paragraph_text(p, "")
+            continue
+        # « Je soussigné(e) [prénom et nom] , » → ligne pointillée
+        if 'Je soussigné' in full and '[prénom et nom]' in full:
+            new = full.replace('[prénom et nom]', f' {LINE} ')
+            set_paragraph_text(p, new)
+            continue
+        # « Fait à … le … » : la ligne contient déjà nos pointillés
+        # depuis l'édition précédente. Si on retrouve les anciens
+        # placeholders du modèle on les nettoie aussi.
+        if full.startswith('Fait à'):
+            new = full
+            new = new.replace('[date à compléter par le candidat]', SHORT_LINE)
+            new = new.replace('Cliquez ici pour choisir une date', SHORT_LINE)
+            new = new.replace('Cliquez ici pour taper du texte.', '')
+            # S'il n'y a pas encore de pointillés (premier passage sur le
+            # modèle d'origine), on injecte une forme propre.
+            if '......' not in new:
+                new = f'Fait à {SHORT_LINE} le {SHORT_LINE}'
+            set_paragraph_text(p, new)
 
 
 def remove_excess_page_breaks(doc):
