@@ -641,6 +641,16 @@ def fill_example_table(table, intitule_at, intitule_ex,
     # Section 5 : Informations complémentaires → rows 30-32
     if infos_compl:
         set_section_content(rows, start_row=30, end_row=32, text=infos_compl)
+    else:
+        # Section 5 facultative et vide chez nous → on supprime les 4
+        # lignes (en-tête row 29 + 3 lignes de saisie blanche rows 30-32)
+        # pour éviter qu'elles ne basculent seules sur une page suivante
+        # quasi-vide (cas typique : p.10 avec uniquement le titre
+        # « 5. Informations complémentaires (facultatif) »).
+        for r in range(32, 28, -1):
+            if r < len(rows):
+                tr = rows[r]
+                tr.getparent().remove(tr)
 
 
 def set_section_content(rows, start_row, end_row, text):
@@ -1043,33 +1053,33 @@ def fill_sommaire(doc):
             return
         set_cell_in_tc(tcs[col_idx], text)
 
-    # Numéros mesurés sur le PDF final (29 pages, layout v2026-06) :
+    # Numéros mesurés sur le PDF final (28 pages, layout v2026-06) :
     #   p 1  Identité
     #   p 2  Présentation du dossier
     #   p 3  Sommaire
     #   p 4  Titre « EXEMPLES DE PRATIQUE PROFESSIONNELLE »
     #   p 5  AT1 ex 1 (front Crew React 18 + AuthContext)
     #   p 8  AT1 ex 2 (grille Planning + drag-and-drop)
-    #   p 11 AT1 ex 3 (Smart Planner modale)
-    #   p 13 AT2 ex 1 (Solver HCR Node.js/Express)
-    #   p 16 AT2 ex 2 (Auth JWT + middlewares)
-    #   p 18 AT2 ex 3 (iCalendar RFC 5545)
-    #   p 20 Titres, diplômes
-    #   p 21 Déclaration sur l'honneur
-    #   p 22 Documents illustrant la pratique
-    #   p 23 Annexes (titre) + p24-29 captures d'écran
+    #   p 10 AT1 ex 3 (Smart Planner modale)
+    #   p 12 AT2 ex 1 (Solver HCR Node.js/Express)
+    #   p 15 AT2 ex 2 (Auth JWT + middlewares)
+    #   p 17 AT2 ex 3 (iCalendar RFC 5545)
+    #   p 19 Titres, diplômes
+    #   p 20 Déclaration sur l'honneur
+    #   p 21 Documents illustrant la pratique
+    #   p 22 Annexes (titre) + p23-28 captures d'écran
 
     # AT1 (rows 2-5)
     write_cell(2, 0, AT1_INTITULE);          write_cell(2, -1, "5")
     write_cell(3, 1, AT1_EX_INTITULE);       write_cell(3, -1, "5")
     write_cell(4, 1, AT1B_EX_INTITULE);      write_cell(4, -1, "8")
-    write_cell(5, 1, AT1C_EX_INTITULE);      write_cell(5, -1, "11")
+    write_cell(5, 1, AT1C_EX_INTITULE);      write_cell(5, -1, "10")
 
     # AT2 (rows 7-10)
-    write_cell(7, 0, AT2_INTITULE);          write_cell(7, -1, "13")
-    write_cell(8, 1, AT2_EX_INTITULE);       write_cell(8, -1, "13")
-    write_cell(9, 1, AT2B_EX_INTITULE);      write_cell(9, -1, "16")
-    write_cell(10, 1, AT2C_EX_INTITULE);     write_cell(10, -1, "18")
+    write_cell(7, 0, AT2_INTITULE);          write_cell(7, -1, "12")
+    write_cell(8, 1, AT2_EX_INTITULE);       write_cell(8, -1, "12")
+    write_cell(9, 1, AT2B_EX_INTITULE);      write_cell(9, -1, "15")
+    write_cell(10, 1, AT2C_EX_INTITULE);     write_cell(10, -1, "17")
 
     # AT3 et AT4 sont non applicables au titre DWWM. On supprime
     # entièrement les 10 rangées correspondantes (11-20) du sommaire
@@ -1085,12 +1095,12 @@ def fill_sommaire(doc):
     # Diplômes / Déclaration / Documents / Annexes — après suppression
     # des 10 rangées AT3/AT4 (11-20), ces rangées sont désormais en
     # indices 12, 13, 14, 15 (au lieu de 22-25).
-    write_cell(12, -1, "20")  # Titres, diplômes
-    write_cell(13, -1, "21")  # Déclaration sur l'honneur
-    write_cell(14, -1, "22")  # Documents illustrant
+    write_cell(12, -1, "19")  # Titres, diplômes
+    write_cell(13, -1, "20")  # Déclaration sur l'honneur
+    write_cell(14, -1, "21")  # Documents illustrant
     write_cell(15, 0, "Annexes — 6 captures d'écran représentatives "
-                      "de l'application Crew (pages 24-29)")
-    write_cell(15, -1, "23")
+                      "de l'application Crew (pages 23-28)")
+    write_cell(15, -1, "22")
 
 
 def fill_documents_illustrant(doc):
