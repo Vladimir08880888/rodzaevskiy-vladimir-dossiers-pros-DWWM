@@ -812,9 +812,6 @@ fonctionnalité sans abonnement payant.
   (l'application est déjà déployée sur **Vercel + Fly.io** —
   https://crew-planner-hazel.vercel.app) : ajout de notifications email,
   internationalisation, CI/CD GitHub Actions
-- **Rechercher une mission d'alternance ou un poste de junior
-  développeur** dans une PME ou une startup, idéalement sur une stack
-  Node.js/React proche de celle maîtrisée dans le projet
 - **Continuer à publier** mes projets personnels sur GitHub pour
   étoffer mon portfolio
 
