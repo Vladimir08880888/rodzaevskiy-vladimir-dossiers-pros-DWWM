@@ -1309,12 +1309,14 @@ def main():
     # restent stables.
     remove_at3_section(doc)
 
-    # Supprimer aussi les sauts de page « extra » entre AT1↔AT2 et
-    # AT2↔Titres-diplômes pour éviter les pages vides.
-    remove_excess_page_breaks(doc)
+    # NOTE : on n'appelle PAS remove_excess_page_breaks() — la suppression
+    # systématique des sauts de page entre AT1↔AT2 et entre les exemples
+    # provoque des en-têtes coupés en bas de page (le titre « Activité-type 2 »
+    # se retrouvait par ex. en bas de la page 10 au lieu d'ouvrir la 11).
+    # On laisse chaque table d'exemple démarrer en haut de sa propre page.
 
-    # S'assurer que les grandes sections démarrent en haut d'une page
-    # plutôt qu'en bas de la précédente (sinon le titre est coupé).
+    # S'assurer que la section principale « Exemples de pratique
+    # professionnelle » démarre en haut d'une nouvelle page.
     ensure_page_break_before(doc, "Exemples de pratique")
 
     append_visual_annexes(doc)
