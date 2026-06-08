@@ -125,8 +125,8 @@ AT1_AVEC_QUI = (
 AT1_NOM_ENTREPRISE = ("AFPA Marseille — projet de fin de formation "
                        "« Crew »")
 AT1_SERVICE = "Formation DWWM, plateau pédagogique"
-AT1_PERIODE_DU = "Avril 2026"
-AT1_PERIODE_AU = "Mai 2026"
+AT1_PERIODE_DU = "Mai 2026"
+AT1_PERIODE_AU = "Juillet 2026"
 
 AT1_INFOS_COMPL = (
     "Application déployée en ligne :\n"
@@ -265,6 +265,237 @@ AT2_INFOS_COMPL = (
     "Repo centralisé pour le jury :\n"
     "https://github.com/Vladimir08880888/vladimir-rodzaevski-dossiers-pros-DWWM"
 )
+
+# ────────────────────────────────────────────────────────────────────────
+# AT1 — EXEMPLE 2 (Planning grid drag-and-drop)
+# ────────────────────────────────────────────────────────────────────────
+AT1B_EX_INTITULE = "Application Crew — grille de planning hebdomadaire avec drag-and-drop"
+
+AT1B_TASKS = (
+    "Toujours sur le projet Crew, j'ai conçu la page Planning qui est "
+    "le cœur d'utilisation quotidien du manager. Il s'agit d'une grille "
+    "(équipiers × jours de la semaine) où chaque cellule représente les "
+    "shifts d'un équipier sur une journée donnée.\n\n"
+    "Réalisations :\n\n"
+    "• rendu d'une grille HTML <table> performante, scrollable horizontalement "
+    "sur mobile, avec en-tête sticky et pastilles de santé du service "
+    "(🟢 Saine / 🟠 Tendue / 🔴 Risque) en bas de chaque colonne jour ;\n\n"
+    "• regroupement visuel des équipiers par poste (cuisine d'abord, salle "
+    "ensuite) avec un en-tête de groupe et une ligne « Extras » en fin de "
+    "groupe affichant les déficits de couverture par service ;\n\n"
+    "• implémentation du DRAG-AND-DROP NATIF HTML5 sur les cartes de shifts : "
+    "le manager déplace un shift d'un jour ou d'un équipier à l'autre, "
+    "la grille met à jour l'état localement (rendu optimiste) puis appelle "
+    "l'API ; si le back rejette (par exemple violation du plafond HCR "
+    "48 h/semaine), l'état est rollback automatiquement et un toast d'erreur "
+    "explique le motif ;\n\n"
+    "• prise en compte de la polyvalence multi-skill pour la validation côté "
+    "client — un slot refuse les drops dans une zone visuellement marquée "
+    "« incompatible » avec animation CSS ;\n\n"
+    "• gestion des cartes en pleine largeur sur mobile via flexbox, conservant "
+    "lisibilité et tap-targets de 44 px minimum.\n\n"
+    "Extrait du gestionnaire de drop :\n"
+    "// front/src/pages/Planning.jsx\n"
+    "async function handleDrop(e, targetDate, targetUserId) {\n"
+    "  e.preventDefault();\n"
+    "  const shiftId = e.dataTransfer.getData('shift-id');\n"
+    "  const prev = shifts;\n"
+    "  // Optimistic update\n"
+    "  setShifts(shifts.map(s =>\n"
+    "    s.id === Number(shiftId)\n"
+    "      ? { ...s, date: targetDate, user_id: targetUserId }\n"
+    "      : s));\n"
+    "  try {\n"
+    "    await shiftsApi.update(shiftId, { date: targetDate, user_id: targetUserId });\n"
+    "  } catch (err) {\n"
+    "    setShifts(prev);  // rollback\n"
+    "    toast.fromError(err);\n"
+    "  }\n"
+    "}"
+)
+
+AT1B_MOYENS = (
+    "Stack technique :\n"
+    "  • HTML5 Drag-and-Drop API native (draggable, ondragstart, ondrop, "
+    "dataTransfer) — pas de bibliothèque externe\n"
+    "  • React 18.3 + hooks (useState, useMemo)\n"
+    "  • lucide-react (Trash2, Edit, GripVertical icons)\n"
+    "  • CSS pur avec custom properties (variables.css)\n"
+    "  • react-toastify pour les notifications d'erreur\n\n"
+    "Bonnes pratiques :\n"
+    "  • Rendu optimiste systématique + rollback automatique en cas d'erreur API\n"
+    "  • Pas de bibliothèque lourde pour le drag-and-drop : choix de l'API "
+    "native qui économise ~30 KB de bundle\n"
+    "  • Mémoïsation des dérivations de l'état (poste groups, extras) via useMemo\n"
+    "  • Accessibilité : draggable + keyboard fallback documenté en TODO."
+)
+
+AT1B_AVEC_QUI = AT1_AVEC_QUI
+
+# ────────────────────────────────────────────────────────────────────────
+# AT1 — EXEMPLE 3 (Modale Smart Planner)
+# ────────────────────────────────────────────────────────────────────────
+AT1C_EX_INTITULE = "Application Crew — Modale Smart Planner avec densité prévue par service"
+
+AT1C_TASKS = (
+    "La modale Smart Planner est le composant le plus dense fonctionnellement "
+    "de l'application : c'est là que le manager déclare la densité prévue "
+    "de chaque service de la semaine et obtient en retour une proposition "
+    "de planning calculée par le back-end sous contraintes Convention HCR.\n\n"
+    "Réalisations :\n\n"
+    "• tableau interactif (7 jours × 2 services Midi/Soir) — chaque cellule "
+    "présente un input numérique 30–200 % avec 3 boutons-presets (Calme 0,5, "
+    "Normal 1,0, Chargé 1,3) ;\n\n"
+    "• boutons « Tous → 0,5 / 1,0 / 1,3 » qui remplissent une colonne entière "
+    "en un clic ;\n\n"
+    "• re-fetch automatique de la proposition à chaque changement de densité "
+    "(useEffect avec capacityByDateAndService en dépendance) — le manager voit "
+    "l'effet en quasi temps réel ;\n\n"
+    "• affichage du résultat en trois blocs :  heures par équipier (vs cibles "
+    "contractuelles), couverture par (service × poste) avec fractions et %, "
+    "services non couverts avec motif explicite ;\n\n"
+    "• bouton d'application qui POST en masse les shifts proposés et ferme "
+    "la modale avec un toast récapitulatif (« 26 shifts créés »).\n\n"
+    "Extrait — déclenchement du re-fetch sur changement de densité :\n"
+    "// front/src/components/planning/SmartPlannerModal.jsx\n"
+    "useEffect(() => {\n"
+    "  setLoading(true);\n"
+    "  shiftsApi.generatePlan({\n"
+    "    family_id: familyId, from, to,\n"
+    "    capacityByDateAndService: perCell,\n"
+    "  }).then(setData).finally(() => setLoading(false));\n"
+    "}, [familyId, from, to, perCell]);"
+)
+
+AT1C_MOYENS = (
+    "Stack technique :\n"
+    "  • React hooks (useState, useEffect, useMemo) + composants contrôlés\n"
+    "  • fetch via shiftsApi (wrapper centralisé)\n"
+    "  • i18next pour i18n FR/EN sur tous les labels\n"
+    "  • CSS Grid pour le tableau de densité (7 cols × 2 rows + colonne de "
+    "presets)\n\n"
+    "Bonnes pratiques :\n"
+    "  • Une seule source de vérité (perCell) ; tous les inputs sont contrôlés\n"
+    "  • Debounce implicite via réconciliation React (les keystrokes rapides "
+    "n'entraînent qu'un seul re-fetch par batch)\n"
+    "  • Gestion du loading state séparée pour ne pas bloquer l'UI"
+)
+
+AT1C_AVEC_QUI = AT1_AVEC_QUI
+
+# ────────────────────────────────────────────────────────────────────────
+# AT2 — EXEMPLE 2 (Authentification JWT + bcrypt)
+# ────────────────────────────────────────────────────────────────────────
+AT2B_EX_INTITULE = "Application Crew — Authentification JWT et middlewares composables"
+
+AT2B_TASKS = (
+    "Le système d'authentification de Crew protège toutes les routes "
+    "applicatives. J'ai conçu l'enchaînement complet — du hachage du "
+    "mot de passe à l'invalidation côté client — sans cookie pour "
+    "éliminer la classe de vulnérabilités CSRF.\n\n"
+    "Réalisations :\n\n"
+    "• endpoint POST /auth/register : validation des champs (email format, "
+    "mot de passe ≥ 8 caractères), unicité email, hachage bcrypt cost 10, "
+    "génération d'un calendar_token aléatoire de 32 octets pour iCal ;\n\n"
+    "• endpoint POST /auth/login : rate-limiting 10 tentatives / 15 min via "
+    "express-rate-limit, comparaison bcrypt (timing-safe), émission d'un JWT "
+    "HS256 d'une durée de 7 jours signé avec JWT_SECRET ;\n\n"
+    "• middleware authRequired qui parse le header Authorization Bearer, "
+    "vérifie la signature et l'expiration, expose req.user au reste de la "
+    "chaîne ; tout token invalide ou expiré renvoie 401 ;\n\n"
+    "• middlewares composables d'autorisation : requireFamilyMember "
+    "(vérifie l'appartenance à l'équipe), requireAdmin (vérifie le rôle "
+    "manager), assertCanManageShifts (combine les deux) ;\n\n"
+    "• endpoint POST /auth/change-password : exige l'ancien mot de passe + "
+    "nouveau, valide le nouveau, hache et stocke.\n\n"
+    "Extrait — middleware authRequired :\n"
+    "// back/src/middleware/auth.js\n"
+    "export function authRequired(req, _res, next) {\n"
+    "  const hdr = req.header('Authorization') || '';\n"
+    "  if (!hdr.startsWith('Bearer ')) throw unauthorized('Token manquant');\n"
+    "  try {\n"
+    "    const decoded = jwt.verify(hdr.slice(7), process.env.JWT_SECRET);\n"
+    "    req.user = { id: decoded.userId };\n"
+    "    next();\n"
+    "  } catch (e) {\n"
+    "    throw unauthorized('Token invalide ou expiré');\n"
+    "  }\n"
+    "}"
+)
+
+AT2B_MOYENS = (
+    "Stack technique :\n"
+    "  • jsonwebtoken 9.0 (JWT HS256)\n"
+    "  • bcrypt 5.1 (hachage Bcrypt, cost 10)\n"
+    "  • express-rate-limit 7.5 (rate-limit IP-based)\n"
+    "  • crypto natif Node pour calendar_token aléatoire\n\n"
+    "Sécurité :\n"
+    "  • JWT en header Authorization Bearer (pas en cookie) → CSRF impossible\n"
+    "  • JWT_SECRET externalisé en .env (gitignored)\n"
+    "  • Bcrypt timing-safe via .compare()\n"
+    "  • Stack traces masquées en prod (catch global)\n"
+    "  • Vérifié manuellement : 0 concaténation SQL → 0 risque d'injection"
+)
+
+AT2B_AVEC_QUI = AT2_AVEC_QUI
+
+# ────────────────────────────────────────────────────────────────────────
+# AT2 — EXEMPLE 3 (Génération iCalendar RFC 5545)
+# ────────────────────────────────────────────────────────────────────────
+AT2C_EX_INTITULE = "Application Crew — Génération d'un flux iCalendar RFC 5545"
+
+AT2C_TASKS = (
+    "Pour permettre à chaque équipier de recevoir ses shifts directement "
+    "dans son application Calendrier native (iPhone Calendar, Google "
+    "Calendar, Outlook), j'ai implémenté la génération d'un flux iCalendar "
+    "conforme à la RFC 5545 — pas d'application supplémentaire à installer.\n\n"
+    "Réalisations :\n\n"
+    "• endpoint GET /calendar/:token et /calendar/:token/perso.ics qui "
+    "authentifient via un token URL (le calendar_token généré à l'inscription) "
+    "— pas de JWT car les applications calendrier ne savent pas en envoyer ;\n\n"
+    "• construction d'un objet VCALENDAR avec ical-generator : un VEVENT par "
+    "shift, intégrant UID stable, DTSTART/DTEND, SUMMARY (Service midi — Cuisine), "
+    "DESCRIPTION (poste, note manager) et VALARM (notification 2 h avant) ;\n\n"
+    "• gestion de la timezone (Europe/Paris) avec passage automatique heure d'été ;\n\n"
+    "• endpoint distinct par équipe (calendar/:token/family/:familyId.ics) pour "
+    "filtrer les shifts d'une seule équipe lorsque l'équipier appartient à "
+    "plusieurs ;\n\n"
+    "• tests manuels validés sur iPhone (ajout via Réglages → Calendrier → "
+    "Comptes → Ajouter URL), Google Calendar (Ajouter agenda → À partir "
+    "d'une URL), Outlook.\n\n"
+    "Extrait — construction du flux :\n"
+    "// back/src/services/ical.service.js\n"
+    "export function buildIcal({ ownerName, shifts }) {\n"
+    "  const cal = ical({\n"
+    "    name: `Crew ${ownerName}`,\n"
+    "    prodId: { company: 'Crew', product: 'Planner', language: 'FR' },\n"
+    "    timezone: 'Europe/Paris',\n"
+    "  });\n"
+    "  shifts.forEach((s) => {\n"
+    "    cal.createEvent({\n"
+    "      uid: `shift-${s.id}@crew-planner`,\n"
+    "      start: shiftStart(s), end: shiftEnd(s),\n"
+    "      summary: `Service ${s.shift_type} — ${s.poste}`,\n"
+    "      alarms: [{ type: 'display', triggerBefore: 7200 }],\n"
+    "    });\n"
+    "  });\n"
+    "  return cal;\n"
+    "}"
+)
+
+AT2C_MOYENS = (
+    "Stack technique :\n"
+    "  • ical-generator 7.2 (construit un flux RFC 5545 valide en JS)\n"
+    "  • date-fns-tz pour les conversions de timezone\n"
+    "  • Express pour exposer les 3 endpoints calendar\n\n"
+    "Standards respectés :\n"
+    "  • RFC 5545 (iCalendar) : UID stable, DTSTART/DTEND, VALARM\n"
+    "  • Réponse Content-Type: text/calendar; charset=utf-8\n"
+    "  • Pas d'expiration sur le token URL → l'équipier ne doit pas le "
+    "partager publiquement (régénération possible depuis Profil)"
+)
+
+AT2C_AVEC_QUI = AT2_AVEC_QUI
 
 # ────────────────────────────────────────────────────────────────────────
 # DIPLÔMES
@@ -491,9 +722,34 @@ def fill_titre_pro(doc):
             set_cell_in_tc(tcs[0], '☒', bold=True)
 
 
+def find_table_by_text(doc, needle, skip_indices=()):
+    """Trouve la première table dont une cellule contient `needle`,
+    en excluant les indices passés dans `skip_indices` (utile pour
+    éviter de tomber sur la table Sommaire qui contient un index
+    textuel de tous les autres titres).
+    """
+    for i, t in enumerate(doc.tables):
+        if i in skip_indices:
+            continue
+        for row in t.rows:
+            for c in row._tr.xpath('.//w:tc'):
+                from lxml import etree
+                text = ''.join(etree.tostring(t_el, method='text',
+                                              encoding='unicode')
+                               for t_el in c.xpath('.//w:t'))
+                if needle in text:
+                    return t
+    return None
+
+
 def fill_diplomes(doc):
-    """Table 7 — Titres, diplômes, CQP."""
-    t = doc.tables[7]
+    """Table « Titres, diplômes, CQP » — trouvée par contenu en excluant
+    la table Sommaire (qui contient une référence textuelle à ce titre)."""
+    # On exclut la Sommaire (tables[3]) qui contient le texte « Titres,
+    # diplômes » en tant qu'entrée de table des matières.
+    t = find_table_by_text(doc, "Titres, diplômes", skip_indices=(3,))
+    if t is None:
+        return
     rows = t._tbl.tr_lst
     # row 3 = ligne d'entête (Intitulé | Autorité | Date)
     # rows 4+ = lignes à remplir
@@ -634,89 +890,73 @@ def fill_sommaire(doc):
             return
         set_cell_in_tc(tcs[col_idx], text)
 
-    # Numéros de page mesurés sur le PDF généré (à actualiser si la
-    # mise en page change). Colonne du n° = dernière colonne de la row.
-    # Layout courant :
+    # Numéros de page mesurés sur le PDF généré avec 3 exemples par AT.
+    # Layout courant (27 pages) :
     #   p 1  Identité
-    #   p 2  Titre professionnel
+    #   p 2  Présentation du dossier
     #   p 3  Sommaire
-    #   p 4  Présentation du dossier
-    #   p 5  AT1 (Développer la partie front-end)
-    #   p 8  AT2 (Développer la partie back-end)
-    #   p 11 Diplômes
-    #   p 12 Déclaration sur l'honneur
-    #   p 13 Documents illustrant
-    #   p 14 Annexes
-    AT1_PAGE = "5"
-    AT2_PAGE = "8"
-    DIPL_PAGE = "11"
-    DECL_PAGE = "12"
-    DOCS_PAGE = "13"
-    ANN_PAGE  = "14"
+    #   p 4  AT1 ex 1 (front Crew React)
+    #   p 8  AT1 ex 2 (Planning drag-and-drop)
+    #   p 10 AT1 ex 3 (Smart Planner modale)
+    #   p 12 AT2 ex 1 (Solver HCR)
+    #   p 14 AT2 ex 2 (Auth JWT)
+    #   p 16 AT2 ex 3 (iCalendar)
+    #   p 18 Titres, diplômes
+    #   p 19 Déclaration sur l'honneur
+    #   p 20 Documents illustrant
+    #   p 21 Annexes (captures d'écran)
 
-    # AT1
-    write_cell(2, 0, AT1_INTITULE)
-    write_cell(2, -1, AT1_PAGE)                  # col 2 (dernière) = n° page
-    write_cell(3, 1, AT1_EX_INTITULE)
-    write_cell(3, -1, AT1_PAGE)                  # col 3 = page de l'exemple
-    write_cell(4, 1, "—")
-    write_cell(4, -1, "—")
-    write_cell(5, 1, "—")
-    write_cell(5, -1, "—")
+    # AT1 (rows 2-5)
+    write_cell(2, 0, AT1_INTITULE);          write_cell(2, -1, "4")
+    write_cell(3, 1, AT1_EX_INTITULE);       write_cell(3, -1, "4")
+    write_cell(4, 1, AT1B_EX_INTITULE);      write_cell(4, -1, "8")
+    write_cell(5, 1, AT1C_EX_INTITULE);      write_cell(5, -1, "10")
 
-    # AT2
-    write_cell(7, 0, AT2_INTITULE)
-    write_cell(7, -1, AT2_PAGE)
-    write_cell(8, 1, AT2_EX_INTITULE)
-    write_cell(8, -1, AT2_PAGE)
-    write_cell(9, 1, "—")
-    write_cell(9, -1, "—")
-    write_cell(10, 1, "—")
-    write_cell(10, -1, "—")
+    # AT2 (rows 7-10)
+    write_cell(7, 0, AT2_INTITULE);          write_cell(7, -1, "12")
+    write_cell(8, 1, AT2_EX_INTITULE);       write_cell(8, -1, "12")
+    write_cell(9, 1, AT2B_EX_INTITULE);      write_cell(9, -1, "14")
+    write_cell(10, 1, AT2C_EX_INTITULE);     write_cell(10, -1, "16")
 
-    # AT3 + AT4 sont non applicables (DWWM ne comporte que 2 AT). Au lieu
-    # de laisser 8 lignes vides avec « — », on les utilise comme « table
-    # des matières détaillée » pour aider la lecture du jury.
-
-    # Rows 12-15 : sous-sections détaillées des AT1 et AT2.
+    # Anciennes lignes AT3/AT4 « Non applicable » repurposées en sous-TOC.
+    # Rows 12-15 : sous-sections détaillées (Description+code, Moyens, etc.).
     write_cell(12, 0, "Sections détaillées des Activités-Types")
     write_cell(12, -1, "—")
-    write_cell(13, 1, "AT1 — Description + extrait de code AuthContext (front)")
-    write_cell(13, -1, "5")
-    write_cell(14, 1, "AT1 — Moyens techniques, équipe, contexte, infos complémentaires")
-    write_cell(14, -1, "6")
-    write_cell(15, 1, "AT2 — Description du solver HCR + extrait de code filtre")
-    write_cell(15, -1, "8")
+    write_cell(13, 1, "AT1 ex 1 — Description + extrait de code AuthContext")
+    write_cell(13, -1, "4")
+    write_cell(14, 1, "AT2 ex 1 — Description du solver HCR + extrait du filtre")
+    write_cell(14, -1, "12")
+    write_cell(15, 1, "AT2 ex 2 — Authentification JWT + middleware authRequired")
+    write_cell(15, -1, "14")
 
     # Rows 17-20 : détail de la section Annexes (6 captures d'écran).
     write_cell(17, 0, "Détail des captures d'écran (Annexes)")
-    write_cell(17, -1, "14")
-    write_cell(18, 1, "Capture 1 — Tableau de bord manager / Grille de planning hebdomadaire")
-    write_cell(18, -1, "14")
-    write_cell(19, 1, "Capture 2 — Modale Smart Planner / Édition équipier (5 profils + polyvalence)")
-    write_cell(19, -1, "16")
+    write_cell(17, -1, "21")
+    write_cell(18, 1, "Capture 1 — Tableau de bord manager / Grille de planning")
+    write_cell(18, -1, "21")
+    write_cell(19, 1, "Capture 2 — Modale Smart Planner / Édition équipier (5 profils)")
+    write_cell(19, -1, "23")
     write_cell(20, 1, "Capture 3 — Statistiques Chart.js / Vue mobile responsive")
-    write_cell(20, -1, "18")
+    write_cell(20, -1, "25")
 
     # Diplômes / Déclaration / Documents / Annexes (rows 22-25)
-    write_cell(22, -1, DIPL_PAGE)
-    write_cell(23, -1, DECL_PAGE)
-    write_cell(24, -1, DOCS_PAGE)
-    # Préciser le contenu réel de la section Annexes pour le jury :
+    write_cell(22, -1, "18")
+    write_cell(23, -1, "19")
+    write_cell(24, -1, "20")
     write_cell(25, 0, "Annexes — 6 captures d'écran représentatives "
                       "de l'application Crew")
-    write_cell(25, -1, ANN_PAGE)
+    write_cell(25, -1, "21")
 
 
 def fill_documents_illustrant(doc):
-    """Table 9 — Documents illustrant la pratique professionnelle (facultatif).
-
-    On y liste les annexes disponibles dans le repo GitHub : code source,
-    diagrammes, screenshots, tests, etc.
+    """Table « Documents illustrant la pratique professionnelle » —
+    trouvée par contenu en excluant la Sommaire qui contient une
+    référence textuelle à ce titre.
     """
-    if len(doc.tables) < 10:
+    t = find_table_by_text(doc, "Documents illustrant la pratique",
+                           skip_indices=(3,))
+    if t is None:
         return
-    t = doc.tables[9]
     rows = t._tbl.tr_lst
     # row 3 = "Intitulé" + placeholder "Cliquez ici…"
     # rows 4+ = à remplir
@@ -780,6 +1020,24 @@ SCREENSHOTS = [
 ]
 
 
+def clone_example_table(doc, source_table_idx):
+    """Clone une table d'exemple (Table 4 ou 5) et l'insère juste après
+    la source. Retourne le nouvel objet Table python-docx.
+
+    Stratégie : deepcopy de l'élément <w:tbl> source puis insertion via
+    le parent body element. Tous les indices doc.tables[N] postérieurs
+    glissent de +1.
+    """
+    from copy import deepcopy
+    source = doc.tables[source_table_idx]
+    src_el = source._tbl
+    new_el = deepcopy(src_el)
+    # On insère juste après la source (et son éventuel paragraphe suivant).
+    src_el.addnext(new_el)
+    # Retrouver le nouvel objet Table parmi doc.tables.
+    return doc.tables[source_table_idx + 1]
+
+
 def append_visual_annexes(doc):
     """Ajoute les captures d'écran représentatives sous la section « Annexes ».
 
@@ -835,7 +1093,11 @@ def main():
     fill_header_table(doc)
     fill_titre_pro(doc)
 
-    # AT1 → Table 4
+    # AT1 → Table 4 (exemple 1) + 2 clones (exemples 2 et 3).
+    # On clone AVANT de remplir pour conserver l'élément vierge.
+    at1_ex2 = clone_example_table(doc, 4)
+    at1_ex3 = clone_example_table(doc, 5)  # 5 = position après ex2
+
     fill_example_table(
         doc.tables[4],
         intitule_at=AT1_INTITULE,
@@ -849,10 +1111,41 @@ def main():
         periode_au=AT1_PERIODE_AU,
         infos_compl=AT1_INFOS_COMPL,
     )
-
-    # AT2 → Table 5
     fill_example_table(
-        doc.tables[5],
+        at1_ex2,
+        intitule_at=AT1_INTITULE,
+        intitule_ex=AT1B_EX_INTITULE,
+        tasks=AT1B_TASKS,
+        moyens=AT1B_MOYENS,
+        avec_qui=AT1B_AVEC_QUI,
+        nom_ent=AT1_NOM_ENTREPRISE,
+        service=AT1_SERVICE,
+        periode_du=AT1_PERIODE_DU,
+        periode_au=AT1_PERIODE_AU,
+        infos_compl="",
+    )
+    fill_example_table(
+        at1_ex3,
+        intitule_at=AT1_INTITULE,
+        intitule_ex=AT1C_EX_INTITULE,
+        tasks=AT1C_TASKS,
+        moyens=AT1C_MOYENS,
+        avec_qui=AT1C_AVEC_QUI,
+        nom_ent=AT1_NOM_ENTREPRISE,
+        service=AT1_SERVICE,
+        periode_du=AT1_PERIODE_DU,
+        periode_au=AT1_PERIODE_AU,
+        infos_compl="",
+    )
+
+    # AT2 → Table 7 (après les 2 clones AT1) + 2 clones.
+    # Index courant AT2 = 4 + 3 (originale + 2 clones) = 7.
+    at2_idx = 7
+    at2_ex2 = clone_example_table(doc, at2_idx)
+    at2_ex3 = clone_example_table(doc, at2_idx + 1)
+
+    fill_example_table(
+        doc.tables[at2_idx],
         intitule_at=AT2_INTITULE,
         intitule_ex=AT2_EX_INTITULE,
         tasks=AT2_TASKS,
@@ -863,6 +1156,32 @@ def main():
         periode_du=AT2_PERIODE_DU,
         periode_au=AT2_PERIODE_AU,
         infos_compl=AT2_INFOS_COMPL,
+    )
+    fill_example_table(
+        at2_ex2,
+        intitule_at=AT2_INTITULE,
+        intitule_ex=AT2B_EX_INTITULE,
+        tasks=AT2B_TASKS,
+        moyens=AT2B_MOYENS,
+        avec_qui=AT2B_AVEC_QUI,
+        nom_ent=AT2_NOM_ENTREPRISE,
+        service=AT2_SERVICE,
+        periode_du=AT2_PERIODE_DU,
+        periode_au=AT2_PERIODE_AU,
+        infos_compl="",
+    )
+    fill_example_table(
+        at2_ex3,
+        intitule_at=AT2_INTITULE,
+        intitule_ex=AT2C_EX_INTITULE,
+        tasks=AT2C_TASKS,
+        moyens=AT2C_MOYENS,
+        avec_qui=AT2C_AVEC_QUI,
+        nom_ent=AT2_NOM_ENTREPRISE,
+        service=AT2_SERVICE,
+        periode_du=AT2_PERIODE_DU,
+        periode_au=AT2_PERIODE_AU,
+        infos_compl="",
     )
 
     # AT3 → laissée en place temporairement pour stabilité d'indexation

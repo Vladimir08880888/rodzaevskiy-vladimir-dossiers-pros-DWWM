@@ -103,7 +103,7 @@ transposables dans une équipe de développement.
 ### 🔹 Exemple 1.1 — Authentification et session avec contextes React
 
 **Projet** : Crew — planification d'équipe
-**Période** : Avril–Mai 2026
+**Période** : Mai – Juillet 2026
 **Stack** : React 18, React Router 6, Context API, fetch (AJAX)
 
 #### Contexte
@@ -217,7 +217,7 @@ sans condition de race ni flash de contenu non autorisé.
 ### 🔹 Exemple 1.2 — Vue calendrier mensuelle responsive
 
 **Projet** : Crew — planification d'équipe
-**Période** : Mai 2026
+**Période** : Mai – Juillet 2026
 **Stack** : React 18, CSS Grid, JavaScript natif (Date API)
 
 #### Contexte
@@ -337,7 +337,7 @@ externe** ajoutée au bundle.
 ### 🔹 Exemple 1.3 — Intégration QR code et abonnement webcal
 
 **Projet** : Crew — planification d'équipe
-**Période** : Mai 2026
+**Période** : Mai – Juillet 2026
 **Stack** : React 18, bibliothèque `qrcode`, API Canvas, scheme `webcal://`
 
 #### Contexte
@@ -443,7 +443,7 @@ Android 14.
 ### 🔹 Exemple 2.1 — Authentification JWT + bcrypt + middlewares composables
 
 **Projet** : Crew — planification d'équipe
-**Période** : Avril–Mai 2026
+**Période** : Mai – Juillet 2026
 **Stack** : Node.js 22, Express 4, jsonwebtoken, bcrypt, mysql2
 
 #### Contexte
@@ -572,7 +572,7 @@ passe, etc.) — tous passent.
 ### 🔹 Exemple 2.2 — Solver Smart Planner sous contraintes Convention HCR
 
 **Projet** : Crew — planification d'équipe
-**Période** : Juin 2026
+**Période** : Mai – Juillet 2026
 **Stack** : Node.js 22, Express, mysql2, algorithme greedy avec scoring multi-critères
 
 #### Contexte
@@ -683,7 +683,7 @@ Configuration.
 ### 🔹 Exemple 2.3 — Génération de flux iCalendar (RFC 5545)
 
 **Projet** : Crew — planification d'équipe
-**Période** : Mai 2026
+**Période** : Mai – Juillet 2026
 **Stack** : Node.js 22, Express, bibliothèque `ical-generator`
 
 #### Contexte
