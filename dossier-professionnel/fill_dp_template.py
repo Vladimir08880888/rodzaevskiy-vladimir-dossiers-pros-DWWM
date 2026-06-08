@@ -1260,6 +1260,31 @@ def append_visual_annexes(doc):
         cap_run.font.size = Pt(9)
 
 
+def strip_footer_version_string(doc):
+    """Supprime « DOSSIER PROFESSIONNEL-Version Traitement de texte –
+    Version du 11/09/2017 » des pieds-de-page (toutes sections, toutes
+    occurrences pair/impair). On préserve le champ « Page N » qui reste
+    utile au jury.
+
+    Approche : cibler les <w:t> dont le texte commence par « DOSSIER
+    PROFESSIONNEL-Version » ou contient « Traitement de texte – Version »
+    et vider leur contenu textuel.
+    """
+    markers = (
+        "DOSSIER PROFESSIONNEL-Version",
+        "Traitement de texte",
+    )
+    for sec in doc.sections:
+        for part in (sec.footer, sec.even_page_footer,
+                     sec.first_page_footer):
+            if part is None:
+                continue
+            root = part._element
+            for t in root.xpath('.//w:t'):
+                if t.text and any(m in t.text for m in markers):
+                    t.text = ""
+
+
 # ────────────────────────────────────────────────────────────────────────
 # MAIN
 # ────────────────────────────────────────────────────────────────────────
@@ -1392,6 +1417,11 @@ def main():
     # destinés à séparer AT3/AT4 (qu'on a supprimés) — d'où une p.20
     # vide juste avant « Titres, diplômes ». On consolide.
     collapse_double_page_breaks(doc)
+
+    # Nettoyer la ligne « DOSSIER PROFESSIONNEL-Version Traitement de
+    # texte – Version du 11/09/2017 » présente dans les pieds de page
+    # du template (sans intérêt pour le jury, encombre visuellement).
+    strip_footer_version_string(doc)
 
     append_visual_annexes(doc)
 
