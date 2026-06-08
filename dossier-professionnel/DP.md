@@ -838,7 +838,7 @@ Mon parcours hors développement constitue un avantage différenciant :
 | **2 Masters (Moscou 2004 + France 2012)** | Capacité d'analyse, recul stratégique, autoformation |
 | **10 ans en restauration (manager)** | Gestion d'équipe, sens du service, gestion du stress |
 | **3 ans en casino (croupier)** | Rigueur des process, attention soutenue, calculs rapides |
-| **Maturité (43 ans)** | Recul, stabilité, capacité à prioriser et tenir des délais |
+| **Maturité (44 ans)** | Recul, stabilité, capacité à prioriser et tenir des délais |
 | **Reconversion choisie** | Motivation intrinsèque forte (pas un choix par défaut) |
 
 Je vise des structures qui valorisent l'autonomie, la rigueur et la
