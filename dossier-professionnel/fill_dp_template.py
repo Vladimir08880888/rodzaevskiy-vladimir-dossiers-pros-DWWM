@@ -625,35 +625,73 @@ def fill_sommaire(doc):
         if row_idx >= len(rows):
             return
         tcs = rows[row_idx].xpath('.//w:tc')
-        if col_idx >= len(tcs):
+        if not tcs:
+            return
+        # Support négatif (col_idx = -1 → dernière colonne).
+        if col_idx < 0:
+            col_idx = len(tcs) + col_idx
+        if col_idx < 0 or col_idx >= len(tcs):
             return
         set_cell_in_tc(tcs[col_idx], text)
 
+    # Numéros de page mesurés sur le PDF généré (à actualiser si la
+    # mise en page change). Colonne du n° = dernière colonne de la row.
+    # Layout courant :
+    #   p 1  Identité
+    #   p 2  Titre professionnel
+    #   p 3  Sommaire
+    #   p 4  Présentation du dossier
+    #   p 5  AT1 (Développer la partie front-end)
+    #   p 8  AT2 (Développer la partie back-end)
+    #   p 11 Diplômes
+    #   p 12 Déclaration sur l'honneur
+    #   p 13 Documents illustrant
+    #   p 14 Annexes
+    AT1_PAGE = "5"
+    AT2_PAGE = "8"
+    DIPL_PAGE = "11"
+    DECL_PAGE = "12"
+    DOCS_PAGE = "13"
+    ANN_PAGE  = "14"
+
     # AT1
     write_cell(2, 0, AT1_INTITULE)
+    write_cell(2, -1, AT1_PAGE)                  # col 2 (dernière) = n° page
     write_cell(3, 1, AT1_EX_INTITULE)
+    write_cell(3, -1, AT1_PAGE)                  # col 3 = page de l'exemple
     write_cell(4, 1, "—")
+    write_cell(4, -1, "—")
     write_cell(5, 1, "—")
+    write_cell(5, -1, "—")
 
     # AT2
     write_cell(7, 0, AT2_INTITULE)
+    write_cell(7, -1, AT2_PAGE)
     write_cell(8, 1, AT2_EX_INTITULE)
+    write_cell(8, -1, AT2_PAGE)
     write_cell(9, 1, "—")
+    write_cell(9, -1, "—")
     write_cell(10, 1, "—")
+    write_cell(10, -1, "—")
 
     # AT3 + AT4 — non applicables (DWWM ne comporte que 2 AT)
-    # On les marque dans le sommaire ; les tables physiques AT3/AT4
-    # sont supprimées (cf. remove_at3_section + le fait qu'il n'y a
-    # pas de table AT4 dans le modèle).
     write_cell(12, 0, "Non applicable (DWWM ne comporte que 2 AT)")
-    write_cell(13, 1, "—")
-    write_cell(14, 1, "—")
-    write_cell(15, 1, "—")
+    write_cell(12, -1, "—")
+    write_cell(13, 1, "—"); write_cell(13, -1, "—")
+    write_cell(14, 1, "—"); write_cell(14, -1, "—")
+    write_cell(15, 1, "—"); write_cell(15, -1, "—")
 
     write_cell(17, 0, "Non applicable")
-    write_cell(18, 1, "—")
-    write_cell(19, 1, "—")
-    write_cell(20, 1, "—")
+    write_cell(17, -1, "—")
+    write_cell(18, 1, "—"); write_cell(18, -1, "—")
+    write_cell(19, 1, "—"); write_cell(19, -1, "—")
+    write_cell(20, 1, "—"); write_cell(20, -1, "—")
+
+    # Diplômes / Déclaration / Documents / Annexes (rows 22-25)
+    write_cell(22, -1, DIPL_PAGE)
+    write_cell(23, -1, DECL_PAGE)
+    write_cell(24, -1, DOCS_PAGE)
+    write_cell(25, -1, ANN_PAGE)
 
 
 def fill_documents_illustrant(doc):
