@@ -691,6 +691,9 @@ def fill_sommaire(doc):
     write_cell(22, -1, DIPL_PAGE)
     write_cell(23, -1, DECL_PAGE)
     write_cell(24, -1, DOCS_PAGE)
+    # Préciser le contenu réel de la section Annexes pour le jury :
+    write_cell(25, 0, "Annexes — 6 captures d'écran représentatives "
+                      "de l'application Crew")
     write_cell(25, -1, ANN_PAGE)
 
 
