@@ -26,7 +26,6 @@ besoin d'accéder à GitHub. Le code vivant continue d'évoluer sur :
 | `crew/front/vercel.json`       | Configuration Vercel (SPA rewrite)                           |
 | `crew/annexes/`                | Documents de soutenance (justification scientifique, plan de tests, manuel, schéma BDD, screenshots) |
 | `crew/CAHIER_DES_CHARGES.md`   | CDC complet, 11 sections                                     |
-| `crew/SOUTENANCE.md`           | Trame de présentation de soutenance                          |
 | `crew/README.md`               | README utilisateur du projet                                 |
 
 ## Ce qui est exclu du snapshot

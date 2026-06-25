@@ -10,7 +10,6 @@ sur 3 mois.
 - 🌐 **Démo en ligne** : https://crew-planner-hazel.vercel.app
 - 📖 [Cahier des charges](https://github.com/Vladimir08880888/crew/blob/main/CAHIER_DES_CHARGES.md)
 - 📋 [README](https://github.com/Vladimir08880888/crew/blob/main/README.md)
-- 🎤 [Plan de soutenance](https://github.com/Vladimir08880888/crew/blob/main/SOUTENANCE.md)
 - 🧪 [Plan de tests](https://github.com/Vladimir08880888/crew/blob/main/annexes/PLAN_DE_TESTS.md) — 60+ scénarios Playwright
 - 📚 [Justification scientifique](https://github.com/Vladimir08880888/crew/blob/main/annexes/JUSTIFICATION_SCIENTIFIQUE.md) — 12 références peer-reviewed
 

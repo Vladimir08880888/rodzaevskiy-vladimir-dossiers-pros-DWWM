@@ -36,7 +36,6 @@ Contenu :
 | Document                              | Lien                                                                         |
 | ------------------------------------- | ---------------------------------------------------------------------------- |
 | Cahier des charges                    | [`dossier-projet/cahier-des-charges.md`](./dossier-projet/cahier-des-charges.md) |
-| Trame de soutenance                   | [`dossier-projet/soutenance.md`](./dossier-projet/soutenance.md)             |
 | Justification scientifique (12 réfs)  | [`dossier-projet/annexes/JUSTIFICATION_SCIENTIFIQUE.md`](./dossier-projet/annexes/JUSTIFICATION_SCIENTIFIQUE.md) |
 | Plan de tests (Playwright)            | [`dossier-projet/annexes/PLAN_DE_TESTS.md`](./dossier-projet/annexes/PLAN_DE_TESTS.md) |
 | Manuel utilisateur                    | [`dossier-projet/annexes/MANUEL_UTILISATEUR.md`](./dossier-projet/annexes/MANUEL_UTILISATEUR.md) |

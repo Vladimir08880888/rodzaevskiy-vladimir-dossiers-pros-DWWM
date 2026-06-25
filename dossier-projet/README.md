@@ -14,7 +14,6 @@
 | Fichier                            | Contenu                                            |
 | ---------------------------------- | -------------------------------------------------- |
 | `cahier-des-charges.md`            | Cahier des charges (stack, métier, schéma, API, sécurité, déploiement, évolutions v2). |
-| `soutenance.md`                    | Trame de présentation de soutenance.               |
 | `README-projet.md`                 | README du dépôt code (lien rapide).                |
 | `annexes/JUSTIFICATION_SCIENTIFIQUE.md` | Synthèse des références peer-reviewed qui sous-tendent le solver (12 sources, INRS, NIOSH, Convention HCR, OR economics). |
 | `annexes/MANUEL_UTILISATEUR.md`    | Guide manager + équipier (synchronisation iCal, FAQ). |
