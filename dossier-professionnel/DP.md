@@ -15,12 +15,12 @@
 1. [Présentation du parcours](#1-présentation-du-parcours)
 2. [Activité-Type n°1 — Développer la partie front-end](#2-activité-type-n1--développer-la-partie-front-end-dune-application-web)
    - Exemple 1.1 : Authentification & session avec contextes React
-   - Exemple 1.2 : Vue calendrier mensuelle responsive
-   - Exemple 1.3 : Intégration QR code & abonnement webcal
+   - Exemple 1.2 : Grille de planning hebdomadaire avec drag-and-drop natif
+   - Exemple 1.3 : Modale Smart Planner — densité prévue par service
 3. [Activité-Type n°2 — Développer la partie back-end](#3-activité-type-n2--développer-la-partie-back-end-dune-application-web)
-   - Exemple 2.1 : Authentification JWT + bcrypt + middlewares composables
-   - Exemple 2.2 : Solver Smart Planner sous contraintes Convention HCR
-   - Exemple 2.3 : Génération de flux iCalendar (RFC 5545)
+   - Exemple 2.1 : Solver Smart Planner sous contraintes Convention HCR
+   - Exemple 2.2 : Authentification JWT + bcrypt + middlewares composables
+   - Exemple 2.3 : Génération de flux iCalendar (RFC 5545) des shifts
 4. [Projet professionnel](#4-projet-professionnel)
 5. [Annexes](#5-annexes)
 
@@ -90,6 +90,17 @@ transposables dans une équipe de développement.
 > recommandations de sécurité, d'accessibilité et d'éco-conception.
 > Il vérifie le bon fonctionnement de l'interface développée.
 
+### Le projet support : Crew
+
+Tous mes exemples portent sur **Crew**, une application web full-stack de
+**planification d'équipe** que j'ai développée en solo comme projet de fin
+de formation. Le manager configure pour chaque équipier son poste, son
+shift habituel et ses heures contractuelles ; le **Smart Planner** génère
+ensuite en un clic un planning de service hebdomadaire équitable, respectant
+la Convention collective HCR, et chaque équipier reçoit ses shifts dans le
+calendrier natif de son téléphone via un flux iCal.
+Démo : <https://crew-planner-hazel.vercel.app> — code : <https://github.com/Vladimir08880888/crew>
+
 ### Compétences couvertes par mes exemples
 
 - C1.1 — Maquetter une application
@@ -113,9 +124,10 @@ la session : connexion, déconnexion, persistance du token JWT au reload,
 protection des routes privées, et accès à l'utilisateur courant depuis
 n'importe quel composant.
 
-J'ai conçu un **système d'authentification basé sur deux contextes React**
-(`AuthContext` et `FamilyContext`) et un composant `ProtectedRoute` qui
-redirige vers `/login` si l'utilisateur n'est pas connecté.
+J'ai conçu un **système d'authentification basé sur des contextes React**
+(`AuthContext` pour la session, `FamilyContext` pour l'équipe active) et un
+composant `ProtectedRoute` qui redirige vers `/login` si l'utilisateur n'est
+pas connecté.
 
 #### Réalisation
 
@@ -214,119 +226,85 @@ sans condition de race ni flash de contenu non autorisé.
 
 ---
 
-### 🔹 Exemple 1.2 — Vue calendrier mensuelle responsive
+### 🔹 Exemple 1.2 — Grille de planning hebdomadaire avec drag-and-drop natif
 
 **Projet** : Crew — planification d'équipe
 **Période** : Mai – Juillet 2026
-**Stack** : React 18, CSS Grid, JavaScript natif (Date API)
+**Stack** : React 18, HTML5 Drag-and-Drop API native, CSS pur
 
 #### Contexte
 
-Les utilisateurs voulaient visualiser leurs tâches non pas seulement
-sous forme de liste, mais aussi dans un **calendrier mensuel** type
-Google Calendar : chaque jour montre les tâches qui y tombent, avec
-des points de couleur par priorité.
+La page **Planning** est le cœur d'utilisation quotidien du manager. Il
+s'agit d'une grille **équipiers × jours de la semaine** où chaque cellule
+représente les shifts d'un équipier sur une journée donnée. Le manager doit
+pouvoir réorganiser le planning à la souris : déplacer un shift d'un jour à
+l'autre ou d'un équipier à l'autre.
 
-J'ai conçu une vue calendrier **sans bibliothèque externe** pour rester
-en contrôle total du rendu, de la navigation et du responsive.
+J'ai implémenté ce drag-and-drop avec l'**API HTML5 native**, sans
+bibliothèque externe, afin d'économiser ~30 KB de bundle et de garder le
+contrôle total du comportement.
 
 #### Réalisation
 
-**1. Calcul de la grille du mois**
+**1. Grille performante et responsive**
+
+- Rendu d'une grille HTML `<table>` scrollable horizontalement sur mobile,
+  en-tête sticky, et pastilles de **santé du service** (🟢 Saine / 🟠 Tendue
+  / 🔴 Risque) en bas de chaque colonne jour.
+- Regroupement visuel des équipiers **par poste** (cuisine puis salle), avec
+  un en-tête de groupe et une ligne « Extras » affichant les déficits de
+  couverture par service.
+
+**2. Drag-and-drop natif avec rendu optimiste + rollback**
 
 ```jsx
 // front/src/pages/Planning.jsx (extrait)
-function buildMonthGrid(year, month) {
-  const firstDay = new Date(year, month, 1);
-  const lastDay = new Date(year, month + 1, 0);
-  const startWeekday = (firstDay.getDay() + 6) % 7; // lundi = 0
-  const daysInMonth = lastDay.getDate();
+async function handleDrop(e, targetDate, targetUserId) {
+  e.preventDefault();
+  const shiftId = e.dataTransfer.getData('shift-id');
+  const prev = shifts;
 
-  const cells = [];
-  // cellules vides avant le 1er du mois
-  for (let i = 0; i < startWeekday; i++) cells.push(null);
-  for (let d = 1; d <= daysInMonth; d++) {
-    cells.push(new Date(year, month, d));
+  // Mise à jour optimiste : on déplace le shift localement tout de suite
+  setShifts(shifts.map(s =>
+    s.id === Number(shiftId)
+      ? { ...s, date: targetDate, user_id: targetUserId }
+      : s));
+
+  try {
+    await shiftsApi.update(shiftId, { date: targetDate, user_id: targetUserId });
+  } catch (err) {
+    setShifts(prev);          // rollback si le back rejette
+    toast.fromError(err);     // ex. : « Plafond HCR 48 h/semaine dépassé »
   }
-  // compléter pour avoir des semaines complètes
-  while (cells.length % 7 !== 0) cells.push(null);
-  return cells;
 }
 ```
 
-**2. Affichage avec CSS Grid**
+Si le back-end rejette le déplacement (par exemple parce qu'il violerait le
+plafond hebdomadaire HCR de 48 h), l'état est **automatiquement restauré** et
+un toast explique le motif.
 
-```jsx
-return (
-  <div className="calendar-grid">
-    {['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'].map(d =>
-      <div className="calendar-header">{d}</div>
-    )}
-    {cells.map((date, i) =>
-      <CalendarCell
-        key={i}
-        date={date}
-        tasks={date ? tasksByDate[isoDate(date)] || [] : []}
-        onClick={() => date && setSelectedDate(date)}
-      />
-    )}
-  </div>
-);
-```
+**3. Validation de la polyvalence côté client**
 
-```css
-.calendar-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
-}
-
-.calendar-cell {
-  aspect-ratio: 1;        /* cases carrées */
-  padding: 0.5rem;
-  display: flex;
-  flex-direction: column;
-}
-
-.priority-dot {
-  width: 6px; height: 6px;
-  border-radius: 50%;
-}
-.priority-dot.high   { background: var(--priority-high); }
-.priority-dot.medium { background: var(--priority-medium); }
-.priority-dot.low    { background: var(--priority-low); }
-
-@media (max-width: 600px) {
-  .calendar-cell { padding: 0.25rem; font-size: 0.75rem; }
-}
-```
-
-**3. Navigation mois précédent/suivant**
-
-```jsx
-function goToMonth(delta) {
-  setCurrentDate(prev => {
-    const d = new Date(prev);
-    d.setMonth(d.getMonth() + delta);
-    return d;
-  });
-}
-```
+Un slot refuse les drops dans une zone visuellement marquée
+« incompatible » (le poste cible n'est pas dans la matrice de compétences de
+l'équipier), avec une animation CSS de refus.
 
 #### Compétences mises en œuvre
 
-- Manipulation de l'**API Date** native (sans bibliothèque type moment.js)
-- **CSS Grid** avec aspect-ratio pour cases carrées
-- Memoization des calculs (`useMemo` sur la grille pour éviter le
-  recalcul à chaque render)
-- **Responsive design** mobile-first avec media queries
-- Gestion d'état local (mois affiché, jour sélectionné)
+- **HTML5 Drag-and-Drop API native** (`draggable`, `ondragstart`, `ondrop`,
+  `dataTransfer`) — zéro dépendance
+- **Rendu optimiste** systématique avec rollback automatique en cas
+  d'erreur API
+- Mémoïsation des dérivations de l'état (groupes de postes, extras) via
+  `useMemo`
+- **Responsive** : grille scrollable horizontale + tap-targets ≥ 44 px sur
+  mobile
 
 #### Résultat
 
-Une vue calendrier interactive, performante (rendu < 50ms même sur
-mobile), responsive du smartphone au desktop, et **zéro dépendance
-externe** ajoutée au bundle.
+Le manager réorganise son planning à la souris de façon fluide ; toute
+violation des règles légales est bloquée côté serveur et expliquée à
+l'utilisateur sans jamais laisser la grille dans un état incohérent.
 
 #### Référence dans le code source
 
@@ -334,86 +312,73 @@ externe** ajoutée au bundle.
 
 ---
 
-### 🔹 Exemple 1.3 — Intégration QR code et abonnement webcal
+### 🔹 Exemple 1.3 — Modale Smart Planner avec densité prévue par service
 
 **Projet** : Crew — planification d'équipe
 **Période** : Mai – Juillet 2026
-**Stack** : React 18, bibliothèque `qrcode`, API Canvas, scheme `webcal://`
+**Stack** : React 18, hooks (useState, useEffect, useMemo), react-i18next
 
 #### Contexte
 
-L'application expose un flux iCalendar permettant à l'utilisateur de
-recevoir les rappels de tâches dans le calendrier natif de son téléphone.
-Pour simplifier l'abonnement, j'ai conçu une **page Profil affichant un
-QR code** qui, scanné avec un téléphone, ouvre directement l'application
-calendrier en mode abonnement.
+La modale **Smart Planner** est le composant le plus dense fonctionnellement
+de l'application : c'est là que le manager déclare la **densité prévue** de
+chaque service de la semaine (combien de monde il attend) et obtient en
+retour une proposition de planning calculée par le back-end sous contraintes
+Convention HCR.
 
 #### Réalisation
 
-**1. Génération du QR code dans React**
+**1. Tableau interactif de densité (7 jours × 2 services)**
+
+- Chaque cellule présente un input numérique 30–200 % avec 3 boutons-presets
+  (**Calme 0,5**, **Normal 1,0**, **Chargé 1,3**).
+- Boutons « Tous → 0,5 / 1,0 / 1,3 » qui remplissent une colonne entière en
+  un clic.
+
+**2. Re-fetch automatique de la proposition à chaque changement**
 
 ```jsx
-// front/src/pages/Profile.jsx (extrait)
-import { useEffect, useRef } from 'react';
-import QRCode from 'qrcode';
-
-function CalendarQR({ token, label, sub = '' }) {
-  const canvasRef = useRef(null);
-
-  useEffect(() => {
-    // webcal:// au lieu de http:// = ouverture directe dans Calendrier
-    const url = `webcal://${window.location.host.replace(':5173', ':3000')}` +
-                `/api/calendar/${token}${sub}`;
-    QRCode.toCanvas(canvasRef.current, url, {
-      width: 200,
-      margin: 1,
-      color: { dark: '#1e1b3a', light: '#ffffff' }
-    });
-  }, [token, sub]);
-
-  return (
-    <div className="qr-block">
-      <h3>{label}</h3>
-      <canvas ref={canvasRef} />
-      <a href={`webcal://...`}>📱 Ouvrir dans Calendrier</a>
-    </div>
-  );
-}
+// front/src/components/planning/SmartPlannerModal.jsx (extrait)
+useEffect(() => {
+  setLoading(true);
+  shiftsApi.generatePlan({
+    family_id: familyId, from, to,
+    capacityByDateAndService: perCell,
+  })
+    .then(setData)
+    .finally(() => setLoading(false));
+}, [familyId, from, to, perCell]);
 ```
 
-**2. Trois flux disponibles**
+Le manager voit l'effet de ses réglages en **quasi temps réel**. La
+réconciliation React fait office de debounce implicite : des keystrokes
+rapides n'entraînent qu'un seul re-fetch par batch.
 
-```jsx
-<CalendarQR token={user.calendar_token}
-            label="Tout mon calendrier" />
-<CalendarQR token={user.calendar_token}
-            label="Mes tâches personnelles"
-            sub="/perso.ics" />
-{families.map(f =>
-  <CalendarQR token={user.calendar_token}
-              label={`Famille ${f.name}`}
-              sub={`/family/${f.id}.ics`} />
-)}
-```
+**3. Affichage du résultat en trois blocs**
+
+- heures par équipier (vs cibles contractuelles),
+- couverture par (service × poste) avec fractions et %,
+- services non couverts avec **motif explicite**.
+
+Un bouton d'application POST en masse les shifts proposés et ferme la modale
+avec un toast récapitulatif (« 26 shifts créés »).
 
 #### Compétences mises en œuvre
 
-- Intégration de **bibliothèque tierce** (`qrcode`) via npm
-- Usage de l'**API Canvas** (référence DOM via `useRef`)
-- Effet de bord avec **`useEffect`** et dépendances ciblées
-- Manipulation d'URL et schémas custom (`webcal://`)
-- **Composition de composants** (1 composant générique, 3 usages)
+- **Composants contrôlés** avec une source de vérité unique (`perCell`)
+- **`useEffect`** avec dépendances ciblées pour le re-fetch live
+- Gestion du `loading` state séparée pour ne pas bloquer l'UI
+- **i18n** systématique (react-i18next) — aucun label en dur
 
 #### Résultat
 
-L'utilisateur scanne 1 QR avec son iPhone ou Android, confirme
-l'abonnement, et reçoit ensuite ses rappels en notifications système
-sans jamais avoir à rouvrir l'application web. Testé sur iOS 17 et
-Android 14.
+Le manager pilote la génération de son planning de façon visuelle et
+itérative, sans jamais quitter l'écran ni recharger la page. Le pont entre
+l'UI et le solver back-end est entièrement réactif.
 
 #### Référence dans le code source
 
-- [`front/src/pages/Profile.jsx`](https://github.com/Vladimir08880888/crew/blob/main/front/src/pages/Profile.jsx)
+- [`front/src/components/planning/SmartPlannerModal.jsx`](https://github.com/Vladimir08880888/crew/blob/main/front/src/components/planning/SmartPlannerModal.jsx)
 
 ---
 
@@ -440,136 +405,7 @@ Android 14.
 
 ---
 
-### 🔹 Exemple 2.1 — Authentification JWT + bcrypt + middlewares composables
-
-**Projet** : Crew — planification d'équipe
-**Période** : Mai – Juillet 2026
-**Stack** : Node.js 22, Express 4, jsonwebtoken, bcrypt, mysql2
-
-#### Contexte
-
-L'application multi-utilisateurs nécessite un système d'authentification
-sécurisé et un mécanisme d'autorisation **composable** : selon la route,
-on peut avoir besoin d'exiger « connecté », « membre d'une famille »,
-« membre actif d'une famille », ou « administrateur d'une famille ».
-
-Plutôt que de dupliquer ces vérifications dans chaque controller, j'ai
-conçu une **chaîne de middlewares** combinables.
-
-#### Réalisation
-
-**1. Hachage bcrypt à l'inscription**
-
-```js
-// back/src/services/password.service.js
-import bcrypt from 'bcrypt';
-
-const COST = 10; // ~100ms par hash sur CPU moderne
-
-export async function hashPassword(plain) {
-  return bcrypt.hash(plain, COST);
-}
-
-export async function comparePassword(plain, hash) {
-  return bcrypt.compare(plain, hash);
-}
-```
-
-**2. Signature JWT au login**
-
-```js
-// back/src/services/jwt.service.js
-import jwt from 'jsonwebtoken';
-import { env } from '../config/env.js';
-
-export function signToken(userId) {
-  return jwt.sign({ sub: userId }, env.jwt.secret, {
-    expiresIn: env.jwt.expiresIn,  // 7d
-    algorithm: 'HS256',
-  });
-}
-
-export function verifyToken(token) {
-  return jwt.verify(token, env.jwt.secret);
-}
-```
-
-**3. Middleware d'authentification**
-
-```js
-// back/src/middleware/auth.js
-import { verifyToken } from '../services/jwt.service.js';
-import { unauthorized } from '../utils/httpError.js';
-
-export function authRequired(req, res, next) {
-  const auth = req.headers.authorization || '';
-  const [scheme, token] = auth.split(' ');
-  if (scheme !== 'Bearer' || !token) {
-    throw unauthorized('Non authentifié');
-  }
-  try {
-    const { sub } = verifyToken(token);
-    req.user = { id: sub };
-    next();
-  } catch (err) {
-    throw unauthorized('Token invalide ou expiré');
-  }
-}
-```
-
-**4. Middlewares d'autorisation famille (composables)**
-
-```js
-// back/src/middleware/familyAccess.js
-export async function requireFamilyMember(req, res, next) {
-  const familyId = Number(req.params.familyId);
-  const member = await familyMemberModel.findByFamilyAndUser(familyId, req.user.id);
-  if (!member) throw forbidden('Pas membre de cette famille');
-  req.familyMember = member;
-  next();
-}
-
-export function requireAdmin(req, res, next) {
-  if (!req.familyMember?.is_admin) throw forbidden('Action réservée aux administrateurs');
-  next();
-}
-```
-
-**5. Chaînage déclaratif dans les routes**
-
-```js
-// back/src/routes/families.routes.js
-router.post('/:familyId/regenerate-code',
-  asyncHandler(requireFamilyMember),
-  requireAdmin,
-  asyncHandler(familiesController.regenerateCode));
-```
-
-#### Compétences mises en œuvre
-
-- **bcrypt** pour le hachage (coût 10, résistant aux GPU)
-- **JWT HS256** signé avec secret stocké en `.env` (jamais en dur)
-- Pattern **middlewares Express composables** (chaque middleware fait UNE chose)
-- Gestion d'erreurs cohérente avec exceptions typées (`unauthorized`, `forbidden`)
-- Récupération du contexte utilisateur depuis `req.user`
-
-#### Résultat
-
-Sécurité au niveau état de l'art pour ce type d'application. Le test
-d'intégration `tests/playwright/` couvre 11 scénarios
-d'authentification (token absent, invalide, expiré, mauvais mot de
-passe, etc.) — tous passent.
-
-#### Référence dans le code source
-
-- [`back/src/middleware/auth.js`](https://github.com/Vladimir08880888/crew/blob/main/back/src/middleware/auth.js)
-- [`back/src/middleware/familyAccess.js`](https://github.com/Vladimir08880888/crew/blob/main/back/src/middleware/familyAccess.js)
-- [`back/src/services/jwt.service.js`](https://github.com/Vladimir08880888/crew/blob/main/back/src/services/jwt.service.js)
-- [`back/src/services/password.service.js`](https://github.com/Vladimir08880888/crew/blob/main/back/src/services/password.service.js)
-
----
-
-### 🔹 Exemple 2.2 — Solver Smart Planner sous contraintes Convention HCR
+### 🔹 Exemple 2.1 — Solver Smart Planner sous contraintes Convention HCR
 
 **Projet** : Crew — planification d'équipe
 **Période** : Mai – Juillet 2026
@@ -680,7 +516,141 @@ Configuration.
 
 ---
 
-### 🔹 Exemple 2.3 — Génération de flux iCalendar (RFC 5545)
+### 🔹 Exemple 2.2 — Authentification JWT + bcrypt + middlewares composables
+
+**Projet** : Crew — planification d'équipe
+**Période** : Mai – Juillet 2026
+**Stack** : Node.js 22, Express 4, jsonwebtoken, bcrypt, mysql2
+
+#### Contexte
+
+L'application multi-utilisateurs nécessite un système d'authentification
+sécurisé et un mécanisme d'autorisation **composable** : selon la route,
+on peut avoir besoin d'exiger « connecté », « membre d'une équipe »,
+« membre actif d'une équipe », ou « administrateur (manager) d'une équipe ».
+
+Plutôt que de dupliquer ces vérifications dans chaque controller, j'ai
+conçu une **chaîne de middlewares** combinables, sans cookie de session pour
+éliminer la classe de vulnérabilités CSRF.
+
+#### Réalisation
+
+**1. Hachage bcrypt à l'inscription**
+
+```js
+// back/src/services/password.service.js
+import bcrypt from 'bcrypt';
+
+const COST = 10; // ~100ms par hash sur CPU moderne
+
+export async function hashPassword(plain) {
+  return bcrypt.hash(plain, COST);
+}
+
+export async function comparePassword(plain, hash) {
+  return bcrypt.compare(plain, hash);
+}
+```
+
+**2. Signature JWT au login**
+
+```js
+// back/src/services/jwt.service.js
+import jwt from 'jsonwebtoken';
+import { env } from '../config/env.js';
+
+export function signToken(userId) {
+  return jwt.sign({ sub: userId }, env.jwt.secret, {
+    expiresIn: env.jwt.expiresIn,  // 7d
+    algorithm: 'HS256',
+  });
+}
+
+export function verifyToken(token) {
+  return jwt.verify(token, env.jwt.secret);
+}
+```
+
+**3. Middleware d'authentification**
+
+```js
+// back/src/middleware/auth.js
+import { verifyToken } from '../services/jwt.service.js';
+import { unauthorized } from '../utils/httpError.js';
+
+export function authRequired(req, res, next) {
+  const auth = req.headers.authorization || '';
+  const [scheme, token] = auth.split(' ');
+  if (scheme !== 'Bearer' || !token) {
+    throw unauthorized('Non authentifié');
+  }
+  try {
+    const { sub } = verifyToken(token);
+    req.user = { id: sub };
+    next();
+  } catch (err) {
+    throw unauthorized('Token invalide ou expiré');
+  }
+}
+```
+
+**4. Middlewares d'autorisation équipe (composables)**
+
+```js
+// back/src/middleware/familyAccess.js
+export async function requireFamilyMember(req, res, next) {
+  const familyId = Number(req.params.familyId);
+  const member = await familyMemberModel.findByFamilyAndUser(familyId, req.user.id);
+  if (!member) throw forbidden('Pas membre de cette équipe');
+  req.familyMember = member;
+  next();
+}
+
+export function requireAdmin(req, res, next) {
+  if (!req.familyMember?.is_admin) throw forbidden('Action réservée aux managers');
+  next();
+}
+```
+
+> *Note d'implémentation : dans le schéma SQL, une équipe est portée par les
+> tables `families` / `family_members` (héritées du squelette initial du
+> projet). Le terme métier exposé à l'utilisateur est partout « équipe ».*
+
+**5. Chaînage déclaratif dans les routes**
+
+```js
+// back/src/routes/families.routes.js
+router.post('/:familyId/regenerate-code',
+  asyncHandler(requireFamilyMember),
+  requireAdmin,
+  asyncHandler(familiesController.regenerateCode));
+```
+
+#### Compétences mises en œuvre
+
+- **bcrypt** pour le hachage (coût 10, résistant aux GPU)
+- **JWT HS256** signé avec secret stocké en `.env` (jamais en dur)
+- Pattern **middlewares Express composables** (chaque middleware fait UNE chose)
+- Gestion d'erreurs cohérente avec exceptions typées (`unauthorized`, `forbidden`)
+- Récupération du contexte utilisateur depuis `req.user`
+
+#### Résultat
+
+Sécurité au niveau état de l'art pour ce type d'application. Le test
+d'intégration `tests/playwright/` couvre 11 scénarios
+d'authentification (token absent, invalide, expiré, mauvais mot de
+passe, etc.) — tous passent.
+
+#### Référence dans le code source
+
+- [`back/src/middleware/auth.js`](https://github.com/Vladimir08880888/crew/blob/main/back/src/middleware/auth.js)
+- [`back/src/middleware/familyAccess.js`](https://github.com/Vladimir08880888/crew/blob/main/back/src/middleware/familyAccess.js)
+- [`back/src/services/jwt.service.js`](https://github.com/Vladimir08880888/crew/blob/main/back/src/services/jwt.service.js)
+- [`back/src/services/password.service.js`](https://github.com/Vladimir08880888/crew/blob/main/back/src/services/password.service.js)
+
+---
+
+### 🔹 Exemple 2.3 — Génération de flux iCalendar (RFC 5545) des shifts
 
 **Projet** : Crew — planification d'équipe
 **Période** : Mai – Juillet 2026
@@ -688,47 +658,45 @@ Configuration.
 
 #### Contexte
 
-Le point fort technique du projet : permettre aux utilisateurs de
-recevoir des rappels natifs sur leur téléphone (iPhone, Android) sans
-installer d'application, en s'appuyant sur le standard **iCalendar
+Le point fort technique du projet : permettre à chaque équipier de
+recevoir ses **shifts** directement sur son téléphone (iPhone, Android)
+sans installer d'application, en s'appuyant sur le standard **iCalendar
 (RFC 5545)** que tous les calendriers natifs comprennent.
 
-J'ai conçu un service de génération iCal et trois endpoints exposant
-des flux différents (global, personnel, par famille).
+J'ai conçu un service de génération iCal et des endpoints exposant le
+planning de l'équipier : un flux global (tous ses shifts, toutes équipes
+confondues) et un sous-flux par équipe.
 
 #### Réalisation
 
-**1. Service de génération**
+**1. Service de génération (un VEVENT par shift)**
 
 ```js
 // back/src/services/ical.service.js
 import ical from 'ical-generator';
 
-export function buildIcal({ ownerName, calendarName, calendarColor, tasks }) {
+export function buildIcal({ ownerName, calendarName, calendarColor, shifts }) {
   const cal = ical({
     name: calendarName || `Crew ${ownerName}`,
     prodId: { company: 'Crew', product: 'Planner', language: 'FR' },
     timezone: 'Europe/Paris',
   });
-
   if (calendarColor) cal.x('X-APPLE-CALENDAR-COLOR', calendarColor);
 
-  tasks.forEach((task) => {
+  shifts.forEach((s) => {
+    const emoji = POSTE_EMOJI[s.poste] || '🍴';
     const event = cal.createEvent({
-      id: `shift-${shift.id}@crew-planner`,
-      start: new Date(task.due_date),
-      allDay: true,
-      summary: task.title,
-      description: task.description || '',
-      categories: [{ name: task.category }],
+      id: `shift-${s.id}@crew-planner`,
+      start: shiftStart(s),   // s.date + s.start_time (ou défaut du shift_type)
+      end:   shiftEnd(s),
+      summary: `${emoji} Service ${s.shift_type} — ${s.poste}`,
+      description: `Poste : ${s.poste}\nShift : ${s.shift_type}`,
+      categories: [{ name: 'Planning service' }],
     });
 
-    // VALARM : notification système 1 jour avant l'échéance
-    event.createAlarm({
-      type: 'display',
-      trigger: 86400, // secondes avant l'événement
-      description: task.title,
-    });
+    // VALARM : notification système 2 h avant le service
+    event.createAlarm({ type: 'display', trigger: 7200,
+      description: `Service ${s.shift_type} dans 2 h` });
   });
 
   return cal.toString();
@@ -739,15 +707,9 @@ export function buildIcal({ ownerName, calendarName, calendarColor, tasks }) {
 
 ```js
 // back/src/routes/calendar.routes.js
-import { Router } from 'express';
-import { calendarController } from '../controllers/calendar.controller.js';
-import { asyncHandler } from '../utils/asyncHandler.js';
-
-export const router = Router();
-
-router.get('/:token',                          asyncHandler(calendarController.export));
-router.get('/:token/perso.ics',                asyncHandler(calendarController.exportPersonal));
-router.get('/:token/family/:familyId.ics',     asyncHandler(calendarController.exportFamily));
+router.get('/:token',                       asyncHandler(calendarController.export));
+router.get('/:token/perso.ics',             asyncHandler(calendarController.export));
+router.get('/:token/family/:familyId.ics',  asyncHandler(calendarController.exportFamily));
 ```
 
 **3. Controller**
@@ -762,15 +724,16 @@ async function userFromToken(token) {
 }
 
 export const calendarController = {
+  // Flux principal : tous les shifts à venir de l'utilisateur
   async export(req, res) {
     const user = await userFromToken(req.params.token);
-    const tasks = await taskModel.listPendingForCalendar(user.id);
-    const ics = buildIcal({ ownerName: `${user.first_name} ${user.last_name}`, tasks });
+    const shifts = await shiftModel.listUpcomingForUser(user.id, 100);
+    const ics = buildIcal({ ownerName: `${user.first_name} ${user.last_name}`, shifts });
     res.set('Content-Type', 'text/calendar; charset=utf-8');
     res.set('Content-Disposition', `inline; filename="crew-${user.first_name}.ics"`);
     res.send(ics);
   },
-  // ... exportPersonal et exportFamily similaires avec filtres SQL différents
+  // Sous-flux : shifts d'une seule équipe (exportFamily, similaire avec filtre SQL)
 };
 ```
 
@@ -782,17 +745,14 @@ export const calendarController = {
   JWT, car le calendrier externe ne peut pas envoyer de header `Authorization`)
 - Configuration de **headers HTTP** appropriés (`Content-Type`,
   `Content-Disposition`)
-- Génération de **3 flux filtrés** depuis une logique unique
+- Gestion de la **timezone** (Europe/Paris, passage heure d'été automatique)
 
 #### Résultat
 
-Les utilisateurs peuvent s'abonner depuis iPhone Calendar, Google
-Calendar ou Outlook. Les notifications déclenchées 24h avant chaque
-échéance par le système d'exploitation, sans aucune application
-Crew à installer. Testé sur iOS 17 et Android 14.
-
-**Aucune solution concurrente** (Todoist, Trello, Notion) n'offre cette
-fonctionnalité sans abonnement payant.
+Chaque équipier s'abonne depuis iPhone Calendar, Google Calendar ou Outlook
+et reçoit ses shifts avec une notification système **2 h avant** chaque
+service, sans aucune application Crew à installer. Testé sur iOS 17 et
+Android 14.
 
 #### Référence dans le code source
 
@@ -849,11 +809,10 @@ casino ont profondément ancrées.
 | Annexe | Référence |
 |---|---|
 | Code source Crew | https://github.com/Vladimir08880888/crew |
-| Dossier de Projet détaillé | [`../dossier-projet/dossier-projet.md`](../dossier-projet/dossier-projet.md) |
-| Suite de tests Playwright (60+ scénarios) | [`tests/playwright/`](https://github.com/Vladimir08880888/crew/blob/main/tests/playwright/) |
-| Documentation API (30+ endpoints) | [`../dossier-projet/api-documentation.md`](../dossier-projet/api-documentation.md) |
-| Document sécurité (OWASP) | [`../dossier-projet/securite.md`](../dossier-projet/securite.md) |
-| Diagrammes UML/Merise | [`../dossier-projet/diagrammes/`](../dossier-projet/diagrammes/) |
+| Dossier de Projet détaillé | [`../dossier-projet/cahier-des-charges.md`](../dossier-projet/cahier-des-charges.md) |
+| Justification scientifique (12 réfs peer-reviewed) | [`../dossier-projet/annexes/JUSTIFICATION_SCIENTIFIQUE.md`](../dossier-projet/annexes/JUSTIFICATION_SCIENTIFIQUE.md) |
+| Plan de tests Playwright (60+ scénarios) | [`../dossier-projet/annexes/PLAN_DE_TESTS.md`](../dossier-projet/annexes/PLAN_DE_TESTS.md) |
+| Schéma de la base de données (Mermaid) | [`../dossier-projet/annexes/SCHEMA_BDD.md`](../dossier-projet/annexes/SCHEMA_BDD.md) |
 | Screenshots de l'application | https://github.com/Vladimir08880888/crew/tree/main/annexes/screenshots |
 
 ---
