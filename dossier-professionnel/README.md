@@ -1,21 +1,14 @@
 # Dossier Professionnel (DP)
 
 Document personnel décrivant les compétences acquises pendant la formation,
-validées par **3 exemples maximum par activité-type**.
+illustrées par **3 exemples par activité-type**, sur le projet **Crew**.
 
-## À produire
+## Contenu
 
-- [ ] `DP.pdf` — version finale signée
-- [ ] AT1 — Développer la partie front-end
-  - [ ] Exemple 1
-  - [ ] Exemple 2
-  - [ ] Exemple 3
-- [ ] AT2 — Développer la partie back-end
-  - [ ] Exemple 1
-  - [ ] Exemple 2
-  - [ ] Exemple 3
+| Fichier | Description |
+| --- | --- |
+| [`DP.md`](./DP.md) | Version détaillée (parcours + 3 exemples par AT, code commenté) |
+| `DP_rempli.pdf` | Dossier Professionnel sur le modèle officiel du Ministère du Travail, signé |
+| `DP_rempli.docx` | Source éditable du DP officiel |
 
-## Ressources
-
-- Modèle officiel AFPA : à demander au formateur
-- Exemple de référence : `~/Documents/Dossier_professionnel-jean-philippe-garcia-afpa-2020.pdf`
+Le livrable remis au jury est `rodzaevskiy-vladimir-dossier-pro.pdf` (copie de `DP_rempli.pdf`).

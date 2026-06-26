@@ -1,11 +1,23 @@
 # Vladimir Rodzaevskiy — Dossiers Professionnels DWWM
 
 Repository centralisant les documents officiels pour la soutenance du
-Titre Professionnel **Développeur Web et Web Mobile** (AFPA Marseille, 2026).
+Titre Professionnel **Développeur Web et Web Mobile** (La Plateforme Formation, Marseille, 2026).
 
 > 🎯 **Pour le jury** : tous les documents sont disponibles en Markdown
 > rendus directement sur GitHub. Les PDF imprimables sont générés à la
 > demande depuis les sources Markdown.
+
+---
+
+## 📂 Livrables (jury)
+
+Les trois documents demandés sont à la racine du dépôt :
+
+| Fichier | Description |
+| --- | --- |
+| [`rodzaevskiy-vladimir-dossier-pro.pdf`](./rodzaevskiy-vladimir-dossier-pro.pdf) | Dossier Professionnel (modèle officiel, signé) |
+| [`rodzaevskiy-vladimir-dossier-projet.pdf`](./rodzaevskiy-vladimir-dossier-projet.pdf) | Dossier de projet — Crew (cahier des charges) |
+| [`rodzaevskiy-vladimir-resume.pdf`](./rodzaevskiy-vladimir-resume.pdf) | CV |
 
 ---
 
@@ -20,7 +32,7 @@ Titre Professionnel **Développeur Web et Web Mobile** (AFPA Marseille, 2026).
 | 📄 PDF     | [`dossier-professionnel/DP.pdf`](./dossier-professionnel/DP.pdf) |
 
 Contenu :
-- Présentation du parcours (2 Masters, 13 ans en restauration/casino,
+- Présentation du parcours (2 Masters, 10 ans en restauration/casino,
   reconversion vers développement web)
 - **AT1 — Développer la partie front-end** : 3 exemples détaillés
 - **AT2 — Développer la partie back-end** : 3 exemples détaillés
@@ -92,7 +104,7 @@ Fonctionnalités clés :
 ## 📅 Soutenance
 
 - **Formation** : Développeur Web et Web Mobile — RNCP 37674, niveau 5
-- **Centre** : AFPA Marseille La Treille
+- **Centre** : La Plateforme Formation, Marseille
 - **Candidat** : Vladimir Rodzaevskiy
 - **Période projet** : avril – juin 2026
 

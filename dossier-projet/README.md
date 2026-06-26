@@ -1,8 +1,7 @@
 # Dossier de Projet — Crew
 
 > Application de planification d'équipe pour la restauration. Projet
-> de fin de formation **Développeur Web et Web Mobile** (AFPA Marseille
-> La Treille, 2026).
+> de fin de formation **Développeur Web et Web Mobile** (La Plateforme Formation, Marseille, 2026).
 
 **Démo en production** : https://crew-planner-hazel.vercel.app
 **Code source** : https://github.com/Vladimir08880888/crew

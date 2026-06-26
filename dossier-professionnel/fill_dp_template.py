@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-Remplit le modèle officiel AFPA "Dossier Professionnel" avec les
+Remplit le modèle officiel "Dossier Professionnel" avec les
 informations de Vladimir Rodzaevskiy pour le titre DWWM.
 
 Source : /home/vladimir/Documents/Dossier Professionnel/1-Dossier_professionnel_*.docx
-Sortie : /home/vladimir/vladimir-rodzaevski-dossiers-pros-DWWM/
-                    dossier-professionnel/DP_AFPA_rempli.docx
+Sortie : /home/vladimir/rodzaevskiy-vladimir-dossiers-pros-DWWM/
+                    dossier-professionnel/DP_rempli.docx
 """
 from copy import deepcopy
 from pathlib import Path
@@ -14,8 +14,8 @@ from docx.oxml.ns import qn
 
 SRC = Path("/home/vladimir/Documents/Dossier Professionnel/"
            "1-Dossier_professionnel_version_traitement_de_texte_11_09_2017.docx")
-DST = Path("/home/vladimir/vladimir-rodzaevski-dossiers-pros-DWWM/"
-           "dossier-professionnel/DP_AFPA_rempli.docx")
+DST = Path("/home/vladimir/rodzaevskiy-vladimir-dossiers-pros-DWWM/"
+           "dossier-professionnel/DP_rempli.docx")
 
 # ────────────────────────────────────────────────────────────────────────
 # DONNÉES PERSONNELLES
@@ -120,16 +120,16 @@ AT1_MOYENS = (
 )
 
 AT1_AVEC_QUI = (
-    "Projet réalisé en solo dans le cadre de la formation AFPA DWWM. "
+    "Projet réalisé en solo dans le cadre de la formation DWWM (La Plateforme Formation, Marseille). "
     "Échanges réguliers avec :\n"
-    "  • le formateur référent AFPA Marseille pour cadrage technique et "
+    "  • le formateur référent de La Plateforme Formation, Marseille pour cadrage technique et "
     "validation des choix d'architecture ;\n"
     "  • la promotion DWWM pour partage d'expérience et code reviews informelles ;\n"
     "  • la communauté open source (forums Stack Overflow, documentation MDN, "
     "documentation React et Vite) pour la résolution de problèmes techniques."
 )
 
-AT1_NOM_ENTREPRISE = ("AFPA Marseille — projet de fin de formation "
+AT1_NOM_ENTREPRISE = ("La Plateforme Formation, Marseille — projet de fin de formation "
                        "« Crew »")
 AT1_SERVICE = "Formation DWWM, plateau pédagogique"
 AT1_PERIODE_DU = "Mai 2026"
@@ -147,7 +147,7 @@ AT1_INFOS_COMPL = (
     "  • Plan de tests (60+ scénarios Playwright) : annexes/PLAN_DE_TESTS.md\n"
     "  • 17 captures d'écran haute résolution : annexes/screenshots/\n\n"
     "Repo centralisé pour le jury :\n"
-    "https://github.com/Vladimir08880888/vladimir-rodzaevski-dossiers-pros-DWWM"
+    "https://github.com/Vladimir08880888/rodzaevskiy-vladimir-dossiers-pros-DWWM"
 )
 
 # ────────────────────────────────────────────────────────────────────────
@@ -251,9 +251,9 @@ AT2_MOYENS = (
 )
 
 AT2_AVEC_QUI = (
-    "Projet réalisé en solo dans le cadre de la formation AFPA DWWM. "
+    "Projet réalisé en solo dans le cadre de la formation DWWM (La Plateforme Formation, Marseille). "
     "Mêmes interlocuteurs que pour l'AT1 :\n"
-    "  • formateur référent AFPA Marseille pour validation des choix d'architecture "
+    "  • formateur référent de La Plateforme Formation, Marseille pour validation des choix d'architecture "
     "et des décisions de sécurité ;\n"
     "  • promotion DWWM pour partage et entraide ;\n"
     "  • documentation officielle Node.js, Express, MariaDB, OWASP."
@@ -278,7 +278,7 @@ AT2_INFOS_COMPL = (
     "  • Plan de tests (60+ scénarios Playwright, 29/29 PASS sur v2) : annexes/PLAN_DE_TESTS.md\n"
     "  • 12 migrations SQL versionnées : back/migrations/001-012\n\n"
     "Repo centralisé pour le jury :\n"
-    "https://github.com/Vladimir08880888/vladimir-rodzaevski-dossiers-pros-DWWM"
+    "https://github.com/Vladimir08880888/rodzaevskiy-vladimir-dossiers-pros-DWWM"
 )
 
 # ────────────────────────────────────────────────────────────────────────
@@ -540,7 +540,7 @@ DIPLOMES = [
      "INSEEC — École de commerce, Paris",
      "2012"),
     ("Titre Professionnel Développeur Web et Web Mobile",
-     "AFPA Marseille (en cours)",
+     "La Plateforme Formation, Marseille (en cours)",
      "2025–2026"),
 ]
 
@@ -947,7 +947,7 @@ def remove_excess_page_breaks(doc):
 def collapse_double_page_breaks(doc):
     """Supprime le saut de page orphelin entre AT2 ex3 et Titres-diplômes.
 
-    Le template AFPA contenait des sauts de page liés aux activités-type
+    Le modèle officiel contenait des sauts de page liés aux activités-type
     AT3/AT4 désormais supprimées. Il en reste un juste avant « Titres,
     diplômes » qui crée une page p.20 entièrement vide. On le retire
     chirurgicalement (sans toucher aux sauts qui séparent AT1↔AT2, ni
@@ -1120,8 +1120,8 @@ def fill_documents_illustrant(doc):
             "github.com/Vladimir08880888/crew",
         "Application déployée en production — "
             "crew-planner-hazel.vercel.app",
-        "Repo centralisé des dossiers AFPA — "
-            "github.com/Vladimir08880888/vladimir-rodzaevski-dossiers-pros-DWWM",
+        "Repo centralisé des dossiers — "
+            "github.com/Vladimir08880888/rodzaevskiy-vladimir-dossiers-pros-DWWM",
         "Dossier Professionnel détaillé (3 exemples par AT, code commenté) — "
             "dossier-professionnel/DP.pdf",
         "Cahier des charges (sections 1-11, évolutions v2 documentées) — "
@@ -1137,8 +1137,8 @@ def fill_documents_illustrant(doc):
             "dossier-projet/annexes/screenshots/",
         "Plan de tests (60+ scénarios Playwright, 29/29 PASS sur v2) — "
             "dossier-projet/annexes/PLAN_DE_TESTS.md",
-        "Trame de soutenance — "
-            "dossier-projet/soutenance.md",
+        "Résumé (CV) — "
+            "rodzaevskiy-vladimir-resume.pdf",
     ]
     for i, doc_str in enumerate(documents):
         row_idx = 3 + i
@@ -1496,7 +1496,7 @@ def main():
     # se retrouvait par ex. en bas de la page 10 au lieu d'ouvrir la 11).
     # On laisse chaque table d'exemple démarrer en haut de sa propre page.
     #
-    # Le template AFPA contient déjà un saut de section avant le titre
+    # Le modèle officiel contient déjà un saut de section avant le titre
     # « EXEMPLES DE PRATIQUE PROFESSIONNELLE » — pas besoin d'en forcer
     # un supplémentaire (sinon page blanche p.4).
     #

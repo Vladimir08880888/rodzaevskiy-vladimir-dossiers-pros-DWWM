@@ -116,6 +116,6 @@ L'admin reçoit une notification.
 
 ## Partie 4 — Support
 
-- **Email** : rodzaevski@icloud.com
-- **Code source** : projet de soutenance AFPA DWWM — Vladimir Rodzaevskiy
+- **Email** : rodzaevski@gmail.com
+- **Code source** : projet de soutenance DWWM — Vladimir Rodzaevskiy
 - **Statut** : démo en production https://crew-planner-hazel.vercel.app

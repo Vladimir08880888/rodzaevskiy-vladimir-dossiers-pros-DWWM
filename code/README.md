@@ -2,7 +2,7 @@
 
 Snapshot complet du code de l'application **Crew** (planification
 d'équipe pour la restauration) figé au moment du dépôt du dossier
-AFPA pour la soutenance DWWM.
+La Plateforme Formation pour la soutenance DWWM.
 
 ## Pourquoi un snapshot ici ?
 

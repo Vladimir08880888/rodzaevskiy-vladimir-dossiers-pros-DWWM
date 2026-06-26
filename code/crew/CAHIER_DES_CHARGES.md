@@ -282,7 +282,7 @@ smart planner immédiatement sans configuration manuelle.
 
 ---
 
-## 10. Critères de validation AFPA
+## 10. Critères de validation DWWM
 
 - **CCP1 — Développer la partie front-end** : React + Vite, components
   fonctionnels, hooks, i18n, gestion d'état via Context, responsive.

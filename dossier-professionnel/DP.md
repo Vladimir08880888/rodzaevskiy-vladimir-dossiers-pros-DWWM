@@ -5,7 +5,7 @@
 **Titre Professionnel visé** : Développeur Web et Web Mobile (DWWM)
 **Niveau** : 5 (équivalent Bac +2)
 **Code RNCP** : 37674
-**Centre de formation** : AFPA Marseille
+**Centre de formation** : La Plateforme Formation, Marseille
 **Année** : 2026
 
 ---
@@ -34,14 +34,14 @@
 |---|---|---|
 | **2004** | Master 2 Économie et Gestion d'Entreprise | Russie — Moscou |
 | **2012** | Master 2 Commerce International — INSEEC | France — Paris |
-| 2025–2026 | Titre Professionnel DWWM (en cours) | France — AFPA Marseille |
+| 2025–2026 | Titre Professionnel DWWM (en cours) | France — La Plateforme Formation, Marseille |
 
 ### 1.2 Parcours professionnel
 
 | Période | Poste | Secteur |
 |---|---|---|
-| ~10 ans | Manager + serveur de salle | Restauration |
-| 3 ans | Croupier | Casino |
+| ~8 ans | Manager + serveur de salle | Restauration |
+| 2 ans | Croupier | Casino |
 | 2025–2026 | Reconversion en cours | Développement web |
 
 ### 1.3 Motivations de la reconversion
@@ -793,8 +793,8 @@ Mon parcours hors développement constitue un avantage différenciant :
 | Atout | Apport en développement |
 |---|---|
 | **2 Masters (Moscou 2004 + France 2012)** | Capacité d'analyse, recul stratégique, autoformation |
-| **10 ans en restauration (manager)** | Gestion d'équipe, sens du service, gestion du stress |
-| **3 ans en casino (croupier)** | Rigueur des process, attention soutenue, calculs rapides |
+| **8 ans en restauration (manager)** | Gestion d'équipe, sens du service, gestion du stress |
+| **2 ans en casino (croupier)** | Rigueur des process, attention soutenue, calculs rapides |
 | **Maturité (44 ans)** | Recul, stabilité, capacité à prioriser et tenir des délais |
 | **Reconversion choisie** | Motivation intrinsèque forte (pas un choix par défaut) |
 
@@ -818,4 +818,4 @@ casino ont profondément ancrées.
 ---
 
 *Document rédigé en mai 2026 pour la soutenance du Titre Professionnel
-Développeur Web et Web Mobile à l'AFPA Marseille.*
+Développeur Web et Web Mobile à La Plateforme Formation, Marseille.*
