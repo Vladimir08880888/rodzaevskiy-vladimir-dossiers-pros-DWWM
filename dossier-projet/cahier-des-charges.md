@@ -110,19 +110,19 @@ calendar_token  CHAR(48)     NOT NULL UNIQUE,
 created_at      DATETIME     DEFAULT CURRENT_TIMESTAMP
 ```
 
-### Table `families`
+### Table `teams`
 ```sql
 id              INT AUTO_INCREMENT PRIMARY KEY,
 name            VARCHAR(120) NOT NULL,
-invite_code     CHAR(14)     NOT NULL UNIQUE,    -- FAM-XXXX-XXXX
+invite_code     CHAR(14)     NOT NULL UNIQUE,    -- CREW-XXXX-XXXX
 created_by      INT          NOT NULL,
 created_at      DATETIME     DEFAULT CURRENT_TIMESTAMP,
 FOREIGN KEY (created_by) REFERENCES users(id)
 ```
 
-### Table `family_members`
+### Table `team_members`
 ```sql
-family_id            INT NOT NULL,
+team_id            INT NOT NULL,
 user_id              INT NOT NULL,
 role                 ENUM('manager','equipier') DEFAULT 'equipier',
 is_admin             BOOLEAN DEFAULT FALSE,
@@ -131,15 +131,15 @@ joined_at            DATETIME DEFAULT CURRENT_TIMESTAMP,
 poste                ENUM('cuisine','salle','bar','plonge','administration') NULL,
 shift_default        ENUM('matin','midi','coupure','soir','nuit') NULL,
 weekly_hours_target  INT NULL,
-PRIMARY KEY (family_id, user_id),
-FOREIGN KEY (family_id) REFERENCES families(id) ON DELETE CASCADE,
+PRIMARY KEY (team_id, user_id),
+FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE,
 FOREIGN KEY (user_id)   REFERENCES users(id)    ON DELETE CASCADE
 ```
 
 ### Table `shifts`
 ```sql
 id           INT AUTO_INCREMENT PRIMARY KEY,
-family_id    INT NOT NULL,
+team_id    INT NOT NULL,
 user_id      INT NOT NULL,
 date         DATE NOT NULL,
 shift_type   ENUM('matin','midi','coupure','soir','nuit') NOT NULL,
@@ -151,7 +151,7 @@ created_by   INT NULL,
 created_at   DATETIME DEFAULT CURRENT_TIMESTAMP,
 updated_at   DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 UNIQUE KEY ux_shift_user_day_type (user_id, date, shift_type),
-FOREIGN KEY (family_id)  REFERENCES families(id) ON DELETE CASCADE,
+FOREIGN KEY (team_id)  REFERENCES teams(id) ON DELETE CASCADE,
 FOREIGN KEY (user_id)    REFERENCES users(id)    ON DELETE CASCADE,
 FOREIGN KEY (created_by) REFERENCES users(id)    ON DELETE SET NULL
 ```
@@ -170,30 +170,30 @@ toutes exigent un header `Authorization: Bearer <jwt>`.
 | GET     | `/users/me`                                         | Profil de l'utilisateur connecté                 |
 | PATCH   | `/users/me`                                         | Modifier prénom / nom                            |
 | POST    | `/users/me/password`                                | Changer son mot de passe                         |
-| GET     | `/families`                                         | Mes équipes                                      |
-| POST    | `/families`                                         | Créer une équipe                                 |
-| GET     | `/families/:id`                                     | Détail d'une équipe + membres                    |
-| PATCH   | `/families/:id`                                     | Renommer                                         |
-| POST    | `/families/join`                                    | Demander à rejoindre une équipe                  |
-| POST    | `/families/:id/approve/:userId`                     | Valider un membre (manager only)                 |
-| PATCH   | `/families/:id/members/:userId`                     | Modifier rôle / poste / shift / heures           |
-| DELETE  | `/families/:id/members/:userId`                     | Retirer un membre                                |
-| POST    | `/families/:id/members/:userId/reset-password`      | Réinitialiser le mot de passe d'un membre        |
-| POST    | `/families/:id/regenerate-code`                     | Régénérer le code d'invitation                   |
-| GET     | `/shifts?family_id=X&from=Y&to=Z`                   | Lister les shifts                                |
+| GET     | `/teams`                                         | Mes équipes                                      |
+| POST    | `/teams`                                         | Créer une équipe                                 |
+| GET     | `/teams/:id`                                     | Détail d'une équipe + membres                    |
+| PATCH   | `/teams/:id`                                     | Renommer                                         |
+| POST    | `/teams/join`                                    | Demander à rejoindre une équipe                  |
+| POST    | `/teams/:id/approve/:userId`                     | Valider un membre (manager only)                 |
+| PATCH   | `/teams/:id/members/:userId`                     | Modifier rôle / poste / shift / heures           |
+| DELETE  | `/teams/:id/members/:userId`                     | Retirer un membre                                |
+| POST    | `/teams/:id/members/:userId/reset-password`      | Réinitialiser le mot de passe d'un membre        |
+| POST    | `/teams/:id/regenerate-code`                     | Régénérer le code d'invitation                   |
+| GET     | `/shifts?team_id=X&from=Y&to=Z`                   | Lister les shifts                                |
 | GET     | `/shifts/upcoming`                                  | Mes 10 prochains shifts                          |
 | POST    | `/shifts`                                           | Créer un shift                                   |
 | PUT     | `/shifts/:id`                                       | Modifier un shift                                |
 | DELETE  | `/shifts/:id`                                       | Supprimer un shift                               |
-| GET     | `/shifts/summary?family_id=X&from=Y&to=Z`           | Heures par membre + slots non couverts           |
+| GET     | `/shifts/summary?team_id=X&from=Y&to=Z`           | Heures par membre + slots non couverts           |
 | POST    | `/shifts/generate-plan`                             | Proposer un planning auto (preview seul)         |
 | POST    | `/shifts/apply-plan`                                | Créer en base les shifts proposés                |
 | POST    | `/shifts/clone-week`                                | Dupliquer une semaine sur la suivante            |
-| DELETE  | `/shifts/clear-week?family_id=X&from=Y&to=Z`        | Vider tous les shifts d'une semaine              |
+| DELETE  | `/shifts/clear-week?team_id=X&from=Y&to=Z`        | Vider tous les shifts d'une semaine              |
 | GET     | `/stats/dashboard`                                  | Tableau de bord d'accueil                        |
-| GET     | `/stats/charts?family_id=X`                         | Stats équipe (poste, membre, timeline)           |
+| GET     | `/stats/charts?team_id=X`                         | Stats équipe (poste, membre, timeline)           |
 | GET     | `/calendar/:token`                                  | Flux iCal de tous les shifts de l'utilisateur    |
-| GET     | `/calendar/:token/team/:familyId.ics`               | Flux iCal d'une équipe spécifique                |
+| GET     | `/calendar/:token/team/:teamId.ics`               | Flux iCal d'une équipe spécifique                |
 
 ---
 
@@ -206,7 +206,7 @@ toutes exigent un header `Authorization: Bearer <jwt>`.
 
 ### Équipe
 - Création, renommage, suppression
-- Code d'invitation court (`FAM-XXXX-XXXX`)
+- Code d'invitation court (`CREW-XXXX-XXXX`)
 - Modération des nouvelles demandes (valider en manager / équipier / refuser)
 - Tableau des membres avec badges visuels (poste, shift, heures)
 - Setup wizard 3 étapes à la première configuration d'un équipier
@@ -325,7 +325,7 @@ strictement inférieurs à 1 ; chaque poste vise une couverture de 1,00
 
 ### 11.2 Paramètres d'établissement (migration 007)
 
-La table `families` reçoit 8 colonnes de configuration métier :
+La table `teams` reçoit 8 colonnes de configuration métier :
 coefficients par niveau (`junior_coef`, `confirme_coef`, `chef_coef`),
 capacité de référence (`max_couverts`) et idéal de couverture par
 service et par poste (`midi_cuisine_ideal`, `midi_salle_ideal`,
@@ -334,14 +334,14 @@ la page Configuration. Anciennes constantes hardcodées supprimées.
 
 ### 11.3 Override personnel et coverage agrégée (008, fractions)
 
-`family_members.coef_override` (nullable) permet de surcharger le
+`team_members.coef_override` (nullable) permet de surcharger le
 poids d'un équipier au cas par cas. L'API `summary` expose
 `overallService` (moyenne cuisine + salle par service) et la
 couverture par poste reste accessible via `coverage`.
 
 ### 11.4 Jours d'ouverture et densité prévue (010)
 
-`families.closed_days_mask` (bitmask 7 bits, défaut = lundi fermé)
+`teams.closed_days_mask` (bitmask 7 bits, défaut = lundi fermé)
 remplace l'ancienne constante. La modale Smart Planner expose un
 tableau (date × service) où le manager déclare la densité prévue
 de chaque service de la semaine (Calme 0,5 / Normal 1,0 / Chargé 1,3
@@ -359,7 +359,7 @@ des bandeaux d'alerte sur la page Planning citant le texte légal.
 
 ### 11.6 Polyvalence (multi-skill, migration 011)
 
-`family_members.skills_mask` (bitmask 5 bits sur les valeurs de
+`team_members.skills_mask` (bitmask 5 bits sur les valeurs de
 l'enum POSTES). Le solver `canFill(member, slotPoste)` lit ce mask
 en priorité ; le scoring conserve un bonus `+3` pour le poste
 primaire, si bien qu'**un équipier polyvalent n'est mobilisé hors
@@ -370,8 +370,8 @@ d'une flexibilité totale.
 
 ### 11.7 Optimisation économique cost-aware (migration 012)
 
-Trois colonnes `*_rate` sur `families` (taux horaire par niveau, en
-centimes/€) + `family_members.rate_override`. Valeurs par défaut
+Trois colonnes `*_rate` sur `teams` (taux horaire par niveau, en
+centimes/€) + `team_members.rate_override`. Valeurs par défaut
 alignées sur les minima de la **Convention HCR 2026** : Junior 12 €,
 Confirmé 14 €, Chef 19 €. Le solver intègre une pénalité de coût
 dans le score de candidature, calibrée pour rester sous-dominante
@@ -398,10 +398,10 @@ annexe scientifique) :
 
 | #   | Sujet                                  | Tables impactées      |
 | --- | -------------------------------------- | --------------------- |
-| 006 | Niveaux Junior / Confirmé / Chef       | `family_members`      |
-| 007 | Paramètres d'équipe (coef, ideal, capacité) | `families`       |
-| 008 | Coef override personnel                | `family_members`      |
-| 009 | Normalisation [0;1] des poids et idéals| `families`, `family_members` |
-| 010 | Jours d'ouverture (closed_days_mask)   | `families`            |
-| 011 | Polyvalence (skills_mask)              | `family_members`      |
-| 012 | Taux horaires + override               | `families`, `family_members` |
+| 006 | Niveaux Junior / Confirmé / Chef       | `team_members`      |
+| 007 | Paramètres d'équipe (coef, ideal, capacité) | `teams`       |
+| 008 | Coef override personnel                | `team_members`      |
+| 009 | Normalisation [0;1] des poids et idéals| `teams`, `team_members` |
+| 010 | Jours d'ouverture (closed_days_mask)   | `teams`            |
+| 011 | Polyvalence (skills_mask)              | `team_members`      |
+| 012 | Taux horaires + override               | `teams`, `team_members` |

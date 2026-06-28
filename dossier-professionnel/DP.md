@@ -125,7 +125,7 @@ protection des routes privées, et accès à l'utilisateur courant depuis
 n'importe quel composant.
 
 J'ai conçu un **système d'authentification basé sur des contextes React**
-(`AuthContext` pour la session, `FamilyContext` pour l'équipe active) et un
+(`AuthContext` pour la session, `TeamContext` pour l'équipe active) et un
 composant `ProtectedRoute` qui redirige vers `/login` si l'utilisateur n'est
 pas connecté.
 
@@ -345,12 +345,12 @@ Convention HCR.
 useEffect(() => {
   setLoading(true);
   shiftsApi.generatePlan({
-    family_id: familyId, from, to,
+    team_id: teamId, from, to,
     capacityByDateAndService: perCell,
   })
     .then(setData)
     .finally(() => setLoading(false));
-}, [familyId, from, to, perCell]);
+}, [teamId, from, to, perCell]);
 ```
 
 Le manager voit l'effet de ses réglages en **quasi temps réel**. La
@@ -600,33 +600,33 @@ export function authRequired(req, res, next) {
 **4. Middlewares d'autorisation équipe (composables)**
 
 ```js
-// back/src/middleware/familyAccess.js
-export async function requireFamilyMember(req, res, next) {
-  const familyId = Number(req.params.familyId);
-  const member = await familyMemberModel.findByFamilyAndUser(familyId, req.user.id);
+// back/src/middleware/teamAccess.js
+export async function requireTeamMember(req, res, next) {
+  const teamId = Number(req.params.teamId);
+  const member = await teamMemberModel.findByTeamAndUser(teamId, req.user.id);
   if (!member) throw forbidden('Pas membre de cette équipe');
-  req.familyMember = member;
+  req.teamMember = member;
   next();
 }
 
 export function requireAdmin(req, res, next) {
-  if (!req.familyMember?.is_admin) throw forbidden('Action réservée aux managers');
+  if (!req.teamMember?.is_admin) throw forbidden('Action réservée aux managers');
   next();
 }
 ```
 
 > *Note d'implémentation : dans le schéma SQL, une équipe est portée par les
-> tables `families` / `family_members` (héritées du squelette initial du
+> tables `teams` / `team_members` (héritées du squelette initial du
 > projet). Le terme métier exposé à l'utilisateur est partout « équipe ».*
 
 **5. Chaînage déclaratif dans les routes**
 
 ```js
-// back/src/routes/families.routes.js
-router.post('/:familyId/regenerate-code',
-  asyncHandler(requireFamilyMember),
+// back/src/routes/teams.routes.js
+router.post('/:teamId/regenerate-code',
+  asyncHandler(requireTeamMember),
   requireAdmin,
-  asyncHandler(familiesController.regenerateCode));
+  asyncHandler(teamsController.regenerateCode));
 ```
 
 #### Compétences mises en œuvre
@@ -647,7 +647,7 @@ passe, etc.) — tous passent.
 #### Référence dans le code source
 
 - [`back/src/middleware/auth.js`](https://github.com/Vladimir08880888/crew/blob/main/back/src/middleware/auth.js)
-- [`back/src/middleware/familyAccess.js`](https://github.com/Vladimir08880888/crew/blob/main/back/src/middleware/familyAccess.js)
+- [`back/src/middleware/teamAccess.js`](https://github.com/Vladimir08880888/crew/blob/main/back/src/middleware/teamAccess.js)
 - [`back/src/services/jwt.service.js`](https://github.com/Vladimir08880888/crew/blob/main/back/src/services/jwt.service.js)
 - [`back/src/services/password.service.js`](https://github.com/Vladimir08880888/crew/blob/main/back/src/services/password.service.js)
 
@@ -712,7 +712,7 @@ export function buildIcal({ ownerName, calendarName, calendarColor, shifts }) {
 // back/src/routes/calendar.routes.js
 router.get('/:token',                       asyncHandler(calendarController.export));
 router.get('/:token/perso.ics',             asyncHandler(calendarController.export));
-router.get('/:token/family/:familyId.ics',  asyncHandler(calendarController.exportFamily));
+router.get('/:token/team/:teamId.ics',  asyncHandler(calendarController.exportTeam));
 ```
 
 **3. Controller**
@@ -736,7 +736,7 @@ export const calendarController = {
     res.set('Content-Disposition', `inline; filename="crew-${user.first_name}.ics"`);
     res.send(ics);
   },
-  // Sous-flux : shifts d'une seule équipe (exportFamily, similaire avec filtre SQL)
+  // Sous-flux : shifts d'une seule équipe (exportTeam, similaire avec filtre SQL)
 };
 ```
 
