@@ -5,7 +5,9 @@
 #   - pandoc            (brew install pandoc)
 #   - Google Chrome     (rendu HTML -> PDF, moteur Skia)
 #   - python-docx       (pip install python-docx)  pour le DP officiel
-#   - Pages             (export DP_rempli.docx -> PDF, conserve le gabarit)
+#   - LibreOffice       (soffice — export DP_rempli.docx -> PDF, 28 pages,
+#                        MÊME moteur que le build d'origine ; NE PAS utiliser
+#                        Pages, qui re-paginé à 36 pages et gonfle le fichier)
 #
 # Usage : ./build-pdf.sh
 set -euo pipefail
@@ -31,19 +33,12 @@ md2pdf dossier-professionnel/DP.md \
   "Dossier Professionnel — Vladimir Rodzaevskiy" \
   dossier-professionnel/DP.pdf
 
-# 3. DP officiel (gabarit Ministère) : docx -> PDF via Pages -------------
-#    (le docx est édité directement ; le script fill_dp_template.py nécessite
-#     le gabarit source, absent de ce dépôt — on exporte donc le docx tel quel.)
-osascript <<APPLESCRIPT
-tell application "Pages"
-  set d to open POSIX file "$PWD/dossier-professionnel/DP_rempli.docx"
-  delay 2
-  export d to POSIX file "$PWD/dossier-professionnel/DP_rempli.pdf" as PDF
-  delay 1
-  close d saving no
-  quit
-end tell
-APPLESCRIPT
+# 3. DP officiel (gabarit Ministère) : docx -> PDF via LibreOffice -------
+#    (le docx est édité directement via python-docx ; fill_dp_template.py
+#     nécessite le gabarit source, absent de ce dépôt — on exporte le docx
+#     tel quel. LibreOffice reproduit la pagination d'origine : 28 pages.)
+soffice --headless --convert-to pdf \
+  --outdir dossier-professionnel dossier-professionnel/DP_rempli.docx
 
 # 4. Copies livrables (noms exigés par le centre) ------------------------
 cp dossier-projet/dossier-projet.pdf      rodzaevskiy-vladimir-dossier-projet.pdf
