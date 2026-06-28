@@ -1,5 +1,5 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { Home, Users, Sun, Moon, LogOut, BarChart3, Globe, CalendarDays } from 'lucide-react';
+import { Home, Users, Sun, Moon, LogOut, BarChart3, Globe, CalendarDays, HelpCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useFamily } from '../../context/FamilyContext.jsx';
@@ -21,6 +21,12 @@ export function Navbar() {
   }
 
   const activeFamilies = families.filter((f) => f.status === 'active');
+  const isManagerSomewhere = activeFamilies.some((f) => f.role === 'manager');
+  // Somme des demandes en attente sur les équipes que je manage.
+  // Sert au badge « Équipes (N) » qui pousse le manager à approuver.
+  const totalPending = activeFamilies
+    .filter((f) => f.role === 'manager')
+    .reduce((sum, f) => sum + (Number(f.pending_count) || 0), 0);
 
   return (
     <header className="navbar">
@@ -31,18 +37,35 @@ export function Navbar() {
         </Link>
 
         <nav className="navbar-links">
-          <NavLink to="/dashboard">
-            <Home size={16} /> <span>{t('nav.dashboard')}</span>
-          </NavLink>
+          {/* Sections manager : tableau de bord, planning, stats, équipes, aide */}
+          {isManagerSomewhere && (
+            <NavLink to="/dashboard">
+              <Home size={16} /> <span>{t('nav.dashboard')}</span>
+            </NavLink>
+          )}
           <NavLink to="/planning">
             <CalendarDays size={16} /> <span>{t('nav.planning')}</span>
           </NavLink>
-          <NavLink to="/stats">
-            <BarChart3 size={16} /> <span>{t('nav.stats')}</span>
-          </NavLink>
-          <NavLink to="/teams">
-            <Users size={16} /> <span>{t('nav.teams')}</span>
-          </NavLink>
+          {isManagerSomewhere && (
+            <>
+              <NavLink to="/stats">
+                <BarChart3 size={16} /> <span>{t('nav.stats')}</span>
+              </NavLink>
+              <NavLink to="/teams">
+                <Users size={16} />
+                <span>{t('nav.teams')}</span>
+                {totalPending > 0 && (
+                  <span className="navbar-badge"
+                        title={t('nav.pendingTitle', { count: totalPending })}>
+                    {totalPending}
+                  </span>
+                )}
+              </NavLink>
+              <NavLink to="/help">
+                <HelpCircle size={16} /> <span>{t('nav.help')}</span>
+              </NavLink>
+            </>
+          )}
         </nav>
 
         <div className="navbar-right">

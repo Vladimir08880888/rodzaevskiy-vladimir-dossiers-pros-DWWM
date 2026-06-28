@@ -80,67 +80,34 @@ async function run() {
 
     const team = await createFamily('Bistrot du Vieux Port', julien);
     // Patron (target=0 → exclu du solver automatique)
-    await addMember(team, julien, 'parent', true,  'administration', null,    0,  'chef');
+    await addMember(team, julien, 'manager', true,  'administration', null,    0,  'chef');
     // Managers : heures cibles 42h
-    await addMember(team, sophie, 'parent', false, 'salle',          'midi', 42, 'chef');
-    await addMember(team, ahmed,  'parent', false, 'cuisine',        'midi', 42, 'chef');
+    await addMember(team, sophie, 'manager', false, 'salle',          'midi', 42, 'chef');
+    await addMember(team, ahmed,  'manager', false, 'cuisine',        'midi', 42, 'chef');
     // Équipiers temps plein : 35h
-    await addMember(team, elena,  'child',  false, 'salle',          'midi', 35, 'confirme');
-    await addMember(team, lucas,  'child',  false, 'salle',          'soir', 35, 'confirme');
-    await addMember(team, mehdi,  'child',  false, 'cuisine',        'midi', 35, 'confirme');
-    await addMember(team, samir,  'child',  false, 'plonge',         'soir', 35, 'confirme');
+    await addMember(team, elena,  'equipier',  false, 'salle',          'midi', 35, 'confirme');
+    await addMember(team, lucas,  'equipier',  false, 'salle',          'soir', 35, 'confirme');
+    await addMember(team, mehdi,  'equipier',  false, 'cuisine',        'midi', 35, 'confirme');
+    await addMember(team, samir,  'equipier',  false, 'plonge',         'soir', 35, 'confirme');
     // Apprentie temps partiel : 24h
-    await addMember(team, clara,  'child',  false, 'cuisine',        'soir', 24, 'junior');
+    await addMember(team, clara,  'equipier',  false, 'cuisine',        'soir', 24, 'junior');
     console.log('[seed] Équipe « Bistrot du Vieux Port » créée (8 membres avec postes + heures cibles)');
 
     // ─────────────────────────────────────────────────────────────────
-    // Planning de service — 14 jours à venir.
-    // Lundi fermé. Mardi-Dimanche : service midi + soir.
-    // Vendredi soir : renfort.
+    // Planning de service — VOLONTAIREMENT VIDE.
+    //
+    // Avant on pré-remplissait la semaine courante avec un plan figé.
+    // Mais ça parasitait la démo du Smart Planner : sur une semaine
+    // déjà couverte, le solver ne pouvait presque rien ajouter
+    // (équipiers déjà proches de leur cible / cap HCR), ce qui donnait
+    // l'impression que « Smart Planner ne fait rien ».
+    //
+    // Décision : aucun shift n'est plus inséré au seed. Le manager
+    // démarre sur un planning vide et fait tourner Smart Planner pour
+    // voir le solver remplir l'ensemble de la semaine de façon
+    // optimale dès le premier clic.
     // ─────────────────────────────────────────────────────────────────
-    const dayOfWeek = (offset) => {
-      const d = new Date();
-      d.setDate(d.getDate() + offset);
-      return d.getDay();
-    };
-
-    const shiftPlan = [];
-    // Seule la semaine en cours est pré-remplie : la suivante reste vide
-    // pour que la démo du Smart Planner ait quelque chose à proposer.
-    for (let offset = 0; offset < 7; offset++) {
-      const dow = dayOfWeek(offset);
-      if (dow === 1) continue;
-
-      // Service midi : 1 chef cuisine + 1 confirmé salle = couverture minimale.
-      shiftPlan.push([offset, ahmed,  'midi', 'cuisine', null]);
-      shiftPlan.push([offset, sophie, 'midi', 'salle',   null]);
-      shiftPlan.push([offset, elena,  'midi', 'salle',   null]);
-
-      // Service soir : un peu plus de monde + renfort vendredi.
-      shiftPlan.push([offset, ahmed,  'soir', 'cuisine', null]);
-      shiftPlan.push([offset, samir,  'soir', 'plonge',  null]);
-      shiftPlan.push([offset, lucas,  'soir', 'salle',   null]);
-      shiftPlan.push([offset, sophie, 'soir', 'salle',   null]);
-      if (dow === 5) {
-        shiftPlan.push([offset, clara, 'soir', 'cuisine', 'Renfort vendredi soir']);
-        shiftPlan.push([offset, elena, 'soir', 'salle',   'Renfort vendredi soir']);
-      }
-    }
-
-    for (const [offset, userId, shiftType, poste, note] of shiftPlan) {
-      const date = dateInDays(offset);
-      try {
-        await pool.query(
-          `INSERT INTO shifts
-             (family_id, user_id, date, shift_type, poste, note, created_by)
-           VALUES (?, ?, ?, ?, ?, ?, ?)`,
-          [team, userId, date, shiftType, poste, note, sophie]
-        );
-      } catch (err) {
-        if (err.code !== 'ER_DUP_ENTRY') throw err;
-      }
-    }
-    console.log(`[seed] ${shiftPlan.length} shifts planifiés sur la semaine courante (la suivante reste vide pour la démo Smart Planner)`);
+    console.log('[seed] aucun shift préinséré — Smart Planner remplira la semaine au premier clic');
 
     // Paramètres de l'établissement : valeurs par défaut (manager pourra les changer
     // depuis l'écran « Configuration » plus tard).

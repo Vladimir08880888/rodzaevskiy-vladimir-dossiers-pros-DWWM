@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, Fragment } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, ChevronLeft, ChevronRight, Calendar, Trash2, Sparkles, Copy, Eraser, AlertTriangle } from 'lucide-react';
+import { Plus, ChevronLeft, ChevronRight, Calendar, Trash2, Sparkles, Copy, Eraser, AlertTriangle, Move, CornerDownRight, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { shiftsApi } from '../api/shifts.api.js';
 import { familiesApi } from '../api/families.api.js';
@@ -32,7 +32,17 @@ function addDays(date, n) {
 }
 
 function iso(date) {
-  return date.toISOString().slice(0, 10);
+  // Format ISO YYYY-MM-DD en HEURE LOCALE (sans conversion UTC).
+  // Bug évité : avant on faisait date.toISOString() qui convertit en
+  // UTC, ce qui décale d'un jour pour les utilisateurs à l'est de UTC
+  // (ex. CEST = UTC+2 en été → lundi 00:00 local = dimanche 22:00 UTC
+  // → iso() renvoyait la veille). Résultat : les shifts du mardi
+  // apparaissaient dans la colonne mercredi, et la colonne mardi
+  // semblait vide.
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
 }
 
 function fmt(date) {
@@ -50,13 +60,18 @@ export default function Planning() {
   const [shifts, setShifts] = useState([]);
   const [members, setMembers] = useState([]);
   const [summary, setSummary] = useState(null);
+  const [settings, setSettings] = useState(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(null); // { date, user_id, shift, ... } or null
   const [showSmart, setShowSmart] = useState(false);
   const [draggedShift, setDraggedShift] = useState(null);
   const [dragOverKey, setDragOverKey] = useState(null);
+  // Alternative clavier au drag-and-drop (accessibilité WCAG 2.1.1) :
+  // le manager « arme » un service, puis choisit une cellule de
+  // destination au clavier via les boutons « Déposer ici ».
+  const [movingShift, setMovingShift] = useState(null);
 
-  const isManager = active?.role === 'parent';
+  const isManager = active?.role === 'manager';
 
   const weekDays = useMemo(
     () => Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)),
@@ -120,20 +135,38 @@ export default function Planning() {
     if (!active) { setLoading(false); return; }
     setLoading(true);
     try {
-      const [shiftsData, fam, summaryData] = await Promise.all([
+      const [shiftsData, fam, summaryData, settingsData] = await Promise.all([
         shiftsApi.list({ family_id: active.id, from, to }),
         familiesApi.detail(active.id),
         isManager ? shiftsApi.summary({ family_id: active.id, from, to }) : Promise.resolve(null),
+        isManager ? familiesApi.getSettings(active.id) : Promise.resolve(null),
       ]);
       setShifts(shiftsData);
       setMembers((fam.members || []).filter((m) => m.status === 'active'));
       setSummary(summaryData);
+      setSettings(settingsData);
     } catch (err) {
       toast.fromError(err);
     } finally {
       setLoading(false);
     }
   }, [active?.id, from, to, isManager]);
+
+  // Bascule un jour ouvert/fermé et persiste en base.
+  async function toggleClosedDay(dow) {
+    if (!isManager || !settings) return;
+    const mask = settings.closed_days_mask ?? 2;
+    const newMask = (mask >> dow) & 1
+      ? (mask & ~(1 << dow))   // était fermé → on ouvre
+      : (mask | (1 << dow));    // était ouvert → on ferme
+    try {
+      await familiesApi.updateSettings(active.id, { closed_days_mask: newMask });
+      setSettings({ ...settings, closed_days_mask: newMask });
+      toast.success(t('planning.openDaysSaved', "Jours d'ouverture mis à jour"));
+    } catch (err) {
+      toast.fromError(err);
+    }
+  }
 
   function memberStats(userId) {
     return summary?.memberStats?.find((m) => m.user_id === userId);
@@ -176,6 +209,14 @@ export default function Planning() {
 
   useEffect(() => { load(); }, [load]);
   useRefetchOnFocus(load);
+
+  // Échap annule un déplacement clavier en cours.
+  useEffect(() => {
+    if (!movingShift) return;
+    const onKey = (e) => { if (e.key === 'Escape') setMovingShift(null); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [movingShift]);
 
   if (!active) {
     return (
@@ -301,6 +342,55 @@ export default function Planning() {
         </div>
       </div>
 
+      {/* Toggle jours d'ouverture — directement sur le Planning pour
+          que le manager bascule un jour fermé/ouvert d'un clic, sans
+          devoir naviguer dans /settings. Sauvegarde instantanée. */}
+      {isManager && settings && (
+        <div className="card" style={{
+          marginTop: '0.5rem',
+          padding: '0.6rem 0.8rem',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.5rem',
+          flexWrap: 'wrap',
+        }}>
+          <span style={{ fontSize: '0.82rem', fontWeight: 600 }}>
+            {t('planning.openDaysLabel', "Jours d'ouverture :")}
+          </span>
+          {['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'].map((label, i) => {
+            const dow = (i + 1) % 7;  // 0=Dim, 1=Lun, …, 6=Sam
+            const mask = settings.closed_days_mask ?? 2;
+            const isClosed = (mask >> dow) & 1;
+            return (
+              <button
+                key={label}
+                type="button"
+                onClick={() => toggleClosedDay(dow)}
+                title={isClosed
+                  ? t('planning.openDayTitle', "Cliquer pour ouvrir")
+                  : t('planning.closeDayTitle', "Cliquer pour fermer")}
+                style={{
+                  padding: '0.3rem 0.7rem',
+                  fontSize: '0.82rem',
+                  fontWeight: 600,
+                  border: '1px solid',
+                  borderColor: isClosed ? 'var(--danger)' : 'var(--success)',
+                  background: isClosed
+                    ? 'rgba(239,68,68,0.12)'
+                    : 'rgba(34,197,94,0.12)',
+                  color: isClosed ? 'var(--danger)' : 'var(--success)',
+                  borderRadius: 'var(--r-sm)',
+                  cursor: 'pointer',
+                  textDecoration: isClosed ? 'line-through' : 'none',
+                }}
+              >
+                {label}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
       {/* Alerte science-based : surcharge soutenue (KC & Terwiesch 2009) */}
       {isManager && summary?.fatigueAlerts?.length > 0 && (
         <div className="card" style={{
@@ -382,6 +472,23 @@ export default function Planning() {
           </span>
         )}
       </p>
+
+      {movingShift && (
+        <div className="card" role="status" style={{
+          marginTop: '0.5rem',
+          borderLeft: '4px solid var(--primary)',
+          background: 'var(--primary-bg, rgba(99,102,241,0.08))',
+          display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap',
+        }}>
+          <Move size={16} style={{ color: 'var(--primary)' }} />
+          <span style={{ fontSize: '0.85rem' }}>
+            {t('planning.moveActive', 'Déplacement clavier : choisissez une cellule « Déposer le service ici », ou Échap pour annuler.')}
+          </span>
+          <button className="ghost" style={{ marginLeft: 'auto' }} onClick={() => setMovingShift(null)}>
+            <X size={14} /> {t('common.cancel', 'Annuler')}
+          </button>
+        </div>
+      )}
 
       {loading && <p className="muted">{t('common.loading')}</p>}
 
@@ -474,6 +581,8 @@ export default function Planning() {
                     const cellKey = `${m.user_id}-${dateStr}`;
                     const canDropHere = isManager && draggedShift && cellShifts.length < 2 &&
                       !(draggedShift.user_id === m.user_id && draggedShift.date.slice(0, 10) === dateStr);
+                    const canMoveHere = isManager && movingShift && cellShifts.length < 2 &&
+                      !(movingShift.user_id === m.user_id && movingShift.date.slice(0, 10) === dateStr);
                     return (
                       <td
                         key={dateStr}
@@ -507,6 +616,16 @@ export default function Planning() {
                             <span className="shift-poste">{t(`postes.${s.poste}`, s.poste)}</span>
                             {isManager && (
                               <button
+                                className="shift-move"
+                                onClick={(e) => { e.stopPropagation(); setMovingShift((cur) => (cur?.id === s.id ? null : s)); }}
+                                aria-pressed={movingShift?.id === s.id}
+                                title={t('planning.moveKeyboard', 'Déplacer ce service (clavier)')}
+                              >
+                                <Move size={11} />
+                              </button>
+                            )}
+                            {isManager && (
+                              <button
                                 className="shift-del"
                                 onClick={(e) => { e.stopPropagation(); deleteShift(s); }}
                                 title={t('common.delete')}
@@ -516,7 +635,16 @@ export default function Planning() {
                             )}
                           </div>
                         ))}
-                        {isManager && cellShifts.length < 2 && (
+                        {canMoveHere && (
+                          <button
+                            className="shift-move-target"
+                            onClick={() => { moveShift(movingShift, dateStr, m.user_id); setMovingShift(null); }}
+                            title={t('planning.moveHere', 'Déposer le service ici')}
+                          >
+                            <CornerDownRight size={12} /> {t('planning.moveHere', 'Déposer le service ici')}
+                          </button>
+                        )}
+                        {isManager && !movingShift && cellShifts.length < 2 && (
                           <button className="shift-add" onClick={() => openCreate(dateStr, m)} title={t('planning.addShift')}>
                             <Plus size={12} />
                           </button>

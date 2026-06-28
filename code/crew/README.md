@@ -65,7 +65,7 @@ Mot de passe pour tous : `motdepasse123`.
 ## Auteur
 
 Projet de soutenance — Titre Professionnel **Développeur Web et Web
-Mobile** (RNCP 37674). Centre de formation : La Plateforme Formation, Marseille.
+Mobile** (RNCP31114). Centre de formation : Marseille La Treille.
 Auteur : Vladimir Rodzaevskiy.
 
 ## Licence

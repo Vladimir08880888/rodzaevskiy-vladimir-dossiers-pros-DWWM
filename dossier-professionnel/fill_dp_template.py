@@ -132,8 +132,8 @@ AT1_AVEC_QUI = (
 AT1_NOM_ENTREPRISE = ("La Plateforme Formation, Marseille — projet de fin de formation "
                        "« Crew »")
 AT1_SERVICE = "Formation DWWM, plateau pédagogique"
-AT1_PERIODE_DU = "Mai 2026"
-AT1_PERIODE_AU = "Juillet 2026"
+AT1_PERIODE_DU = "Avril 2026"
+AT1_PERIODE_AU = "Juin 2026"
 
 AT1_INFOS_COMPL = (
     "Application déployée en ligne :\n"
@@ -346,7 +346,10 @@ AT1B_MOYENS = (
     "  • Pas de bibliothèque lourde pour le drag-and-drop : choix de l'API "
     "native qui économise ~30 KB de bundle\n"
     "  • Mémoïsation des dérivations de l'état (poste groups, extras) via useMemo\n"
-    "  • Accessibilité : draggable + keyboard fallback documenté en TODO."
+    "  • Accessibilité (WCAG 2.1.1) : alternative clavier complète au "
+    "drag-and-drop — bouton « Déplacer » sur chaque service, cibles "
+    "« Déposer ici », annulation par Échap ; focus visible et "
+    "prefers-reduced-motion respectés."
 )
 
 AT1B_AVEC_QUI = AT1_AVEC_QUI

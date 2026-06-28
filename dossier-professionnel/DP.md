@@ -114,7 +114,7 @@ Démo : <https://crew-planner-hazel.vercel.app> — code : <https://github.com/V
 ### 🔹 Exemple 1.1 — Authentification et session avec contextes React
 
 **Projet** : Crew — planification d'équipe
-**Période** : Mai – Juillet 2026
+**Période** : Avril – Juin 2026
 **Stack** : React 18, React Router 6, Context API, fetch (AJAX)
 
 #### Contexte
@@ -229,7 +229,7 @@ sans condition de race ni flash de contenu non autorisé.
 ### 🔹 Exemple 1.2 — Grille de planning hebdomadaire avec drag-and-drop natif
 
 **Projet** : Crew — planification d'équipe
-**Période** : Mai – Juillet 2026
+**Période** : Avril – Juin 2026
 **Stack** : React 18, HTML5 Drag-and-Drop API native, CSS pur
 
 #### Contexte
@@ -293,6 +293,9 @@ l'équipier), avec une animation CSS de refus.
 
 - **HTML5 Drag-and-Drop API native** (`draggable`, `ondragstart`, `ondrop`,
   `dataTransfer`) — zéro dépendance
+- **Accessibilité (WCAG 2.1.1)** : alternative clavier complète au
+  drag-and-drop — bouton « Déplacer » sur chaque service, cibles
+  « Déposer ici » navigables au clavier, annulation par Échap
 - **Rendu optimiste** systématique avec rollback automatique en cas
   d'erreur API
 - Mémoïsation des dérivations de l'état (groupes de postes, extras) via
@@ -315,7 +318,7 @@ l'utilisateur sans jamais laisser la grille dans un état incohérent.
 ### 🔹 Exemple 1.3 — Modale Smart Planner avec densité prévue par service
 
 **Projet** : Crew — planification d'équipe
-**Période** : Mai – Juillet 2026
+**Période** : Avril – Juin 2026
 **Stack** : React 18, hooks (useState, useEffect, useMemo), react-i18next
 
 #### Contexte
@@ -408,7 +411,7 @@ l'UI et le solver back-end est entièrement réactif.
 ### 🔹 Exemple 2.1 — Solver Smart Planner sous contraintes Convention HCR
 
 **Projet** : Crew — planification d'équipe
-**Période** : Mai – Juillet 2026
+**Période** : Avril – Juin 2026
 **Stack** : Node.js 22, Express, mysql2, algorithme greedy avec scoring multi-critères
 
 #### Contexte
@@ -519,7 +522,7 @@ Configuration.
 ### 🔹 Exemple 2.2 — Authentification JWT + bcrypt + middlewares composables
 
 **Projet** : Crew — planification d'équipe
-**Période** : Mai – Juillet 2026
+**Période** : Avril – Juin 2026
 **Stack** : Node.js 22, Express 4, jsonwebtoken, bcrypt, mysql2
 
 #### Contexte
@@ -653,7 +656,7 @@ passe, etc.) — tous passent.
 ### 🔹 Exemple 2.3 — Génération de flux iCalendar (RFC 5545) des shifts
 
 **Projet** : Crew — planification d'équipe
-**Période** : Mai – Juillet 2026
+**Période** : Avril – Juin 2026
 **Stack** : Node.js 22, Express, bibliothèque `ical-generator`
 
 #### Contexte

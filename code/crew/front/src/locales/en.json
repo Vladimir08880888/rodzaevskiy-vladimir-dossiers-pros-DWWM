@@ -8,12 +8,14 @@
     "planning": "Schedule",
     "stats": "Statistics",
     "teams": "Teams",
+    "help": "Help",
     "profile": "Profile",
     "logout": "Sign out",
     "login": "Sign in",
     "register": "Sign up",
     "activeTeam": "Active team",
-    "noTeam": "No team"
+    "noTeam": "No team",
+    "pendingTitle": "{{count}} request(s) pending approval"
   },
   "auth": {
     "login": {
@@ -33,7 +35,12 @@
       "passwordHint": "At least 8 characters",
       "submit": "Create my account",
       "haveAccount": "Already have an account?",
-      "login": "Sign in"
+      "login": "Sign in",
+      "accountTypeLabel": "I am…",
+      "accountEmployee": "An employee (I have a code)",
+      "accountOwner": "A restaurant owner",
+      "accountEmployeeHint": "Your manager gave you an invite code. You're joining an existing team — after signing up you'll enter the code to request to join.",
+      "accountOwnerHint": "You own or run a restaurant. After signing up you'll create your own team and get the code to share with your staff."
     },
     "errors": {
       "invalid": "Invalid credentials",
@@ -58,8 +65,8 @@
     "send": "Send"
   },
   "roles": {
-    "parent": "Manager",
-    "child": "Member",
+    "manager": "Manager",
+    "equipier": "Member",
     "admin": "Admin",
     "you": "You"
   },
@@ -80,10 +87,14 @@
   },
   "dashboard": {
     "welcomeTitle": "Welcome, {{name}}!",
-    "welcomeHint": "You don't belong to any team yet. Create one to get started, or join an existing one with an invite code.",
+    "welcomeHint": "You don't belong to any team yet. Ask your manager for the invite code to join yours.",
     "createTeam": "Create a team",
-    "join": "Join",
-    "parentGreeting": "Hello {{name}}, you are a manager.",
+    "join": "Join a team",
+    "ownerHint": "Are you a restaurant owner? Sign in again choosing « restaurant owner » at registration to create your own team.",
+    "pendingTitle": "Request pending approval",
+    "pendingHint": "The manager must approve your request before you can access the schedule.",
+    "pendingRefreshHint": "This page will update automatically as soon as your request is approved.",
+    "managerGreeting": "Hello {{name}}, you are a manager.",
     "openPlanning": "Open schedule",
     "hoursPlanned": "Hours planned",
     "outOfTarget": "of {{target}}h target",
@@ -91,8 +102,8 @@
     "activeMembers": "Active members",
     "hoursThisWeek": "Hours this week",
     "weekHours": "planned",
-    "childGreeting": "👋 Hi {{name}}!",
-    "childIntro": "You're part of the team"
+    "equipierGreeting": "👋 Hi {{name}}!",
+    "equipierIntro": "You're part of the team"
   },
   "families": {
     "title": "My teams",
@@ -107,7 +118,7 @@
     "resetPassword": "Reset password",
     "leave": "Leave team",
     "empty": "No teams yet",
-    "emptyHint": "Create a team to plan shifts, or join an existing one with a code.",
+    "emptyHint": "You don't manage any team. If you're a restaurant owner, sign up again choosing « restaurant owner » at registration.",
     "statusPending": "Pending"
   },
   "familyCreate": {
@@ -282,6 +293,9 @@
     "weekRange": "From {{from}} to {{to}}",
     "member": "Member",
     "addShift": "Add a shift",
+    "moveKeyboard": "Move this shift (keyboard)",
+    "moveHere": "Drop the shift here",
+    "moveActive": "Keyboard move: pick a \"Drop the shift here\" cell, or press Esc to cancel.",
     "editShift": "Edit shift",
     "shiftType": "Type",
     "poste": "Role",
@@ -315,6 +329,9 @@
     "hoursPerMember": "Hours per member (after applying)",
     "uncoveredTitle": "Unstaffed shifts (below min threshold)",
     "coverageTitle": "Coverage per service and station",
+    "clearFirst": "Start from an empty schedule (existing shifts of the week will be erased before applying)",
+    "fullWeekTitle": "This week is already well covered.",
+    "fullWeekHint": "Team members are close to their contractual target. Smart Planner only suggests a few additions — to rebuild the whole week from scratch, check « Start from an empty schedule » below.",
     "capacityLabel": "Service density",
     "capacityHint": "50 % = quiet service (target halved). 100 % = full day. 150 % = heavy load.",
     "densityHint": "Manager's estimate based on reservations and history.",
@@ -355,5 +372,100 @@
     "levelHint": "Weights service coverage. Junior = half-power, Chef = lead.",
     "polyvalence": "Versatility (stations mastered)",
     "polyvalenceHint": "Primary station (★) is mandatory. Check additional stations this member can cover — the solver will assign them only if no specialist is eligible."
+  },
+  "managerHelp": {
+    "title": "Manager guide",
+    "intro": "How Crew schedules your team, and why. A concrete walkthrough of the concepts, business rules and alerts behind the app.",
+    "profiles": {
+      "title": "The 5 team-member levels",
+      "lead": "Each team member has a level that weights their contribution to a shift. To cover a station at 100% (1.00), levels add up until they reach 1.00.",
+      "apprenti": "first month on the station, needs constant supervision.",
+      "debutant": "holds the station but needs help during rush.",
+      "autonome": "autonomous on routine tasks, occasional coaching.",
+      "pilier": "carries the station, can train a junior alongside.",
+      "referent": "expert, can run the whole service (almost a chef).",
+      "example": "<strong>Example</strong> — a Senior (0.60) + an Autonomous (0.40) cover the station at 100%. A lone Apprentice (0.15) only covers 15%: the solver will refuse to leave them alone if the « junior alone forbidden » rule is on."
+    },
+    "polyvalence": {
+      "title": "Versatility (multi-station)",
+      "lead": "Each member has a primary station (★ mandatory) and can check secondary stations they can cover when needed (kitchen, dish, floor, bar).",
+      "detail": "The solver honours the primary specialty first. It moves a member outside their specialty only when no specialist is eligible (off, absent, capped on hours). This is the short-chain theorem in action: 2-3 versatility links per member absorbs the vast majority of contingencies.",
+      "source": "Reference: Jordan & Graves, « Principles on the benefits of manufacturing process flexibility », Management Science 41(4), 1995."
+    },
+    "smartPlanner": {
+      "title": "The Smart Planner",
+      "lead": "« Smart Planner » button on the Schedule page. The greedy solver produces a complete weekly draft in seconds — you then validate or tweak.",
+      "step1": "For every cell (day × shift), it identifies open stations and target level.",
+      "step2": "It filters eligible members (presence, versatility, weekly rest, HCR cap, junior-alone rule).",
+      "step3": "It picks those that maximize a combined score: coverage, target-hour smoothing, payroll savings, ideal-profile fit.",
+      "step4": "It moves to the next cell while updating counters (cumulated hours, remaining rest days, payroll).",
+      "density": "You set the expected density per day and shift (« lunch » / « dinner »). Three presets:",
+      "calme": "light service, fewer expected covers — the solver targets 50% of ideal staffing.",
+      "normal": "standard day — 100% of ideal staffing.",
+      "charge": "rush expected (full bookings, event) — 130% of ideal staffing."
+    },
+    "hcr": {
+      "title": "HCR Convention constraints",
+      "lead": "The solver and alerts rely on the French HCR Collective Convention (hotels, cafés, restaurants) and the Labor Code.",
+      "weekly": "Maximum 48h per week per member (HCR art. 21 + L3121-20).",
+      "dailyKitchen": "Maximum 11h per day for kitchen staff.",
+      "dailyOthers": "Maximum 11h30 per day for the rest of the team (floor, bar, dish).",
+      "rest": "At least 2 weekly rest days (consecutive or not).",
+      "juniorAlone": "Custom business rule: a junior (Apprentice / Beginner) is never assigned alone on a station without at least one Senior or Lead present.",
+      "source": "Sources: HCR Collective Convention (IDCC 1979); Labor Code L3121-20."
+    },
+    "alerts": {
+      "title": "Alerts (banner above the schedule)",
+      "lead": "Three alert families may appear:",
+      "hcrLabel": "HCR non-compliance",
+      "hcr": "a member exceeds 48h/week or a daily cap, or is missing their 2 rest days. Blocking for validation.",
+      "fatigueLabel": "Overload / fatigue",
+      "fatigue": "too many hours over a short window (KC & Terwiesch 2009, Management Science). Non-blocking but to monitor — quality and accident risk.",
+      "coverageLabel": "Understaffing",
+      "coverage": "the staffing score for a shift drops below 0.80 (≈ 80% of target). The overall Service Health Score turns orange / red as soon as a shift dips too low.",
+      "source": "Sources: KC & Terwiesch, « Impact of workload on service time and patient safety », Management Science 55(9), 2009; INRS ED 880 (mental and physical load)."
+    },
+    "algo": {
+      "title": "Solver algorithmic formulas",
+      "lead": "Smart Planner combines four mathematical building blocks. Understanding how they fit together helps you anticipate the solver's choices and tune your parameters (ideals, coefs, densities) for an even tighter schedule.",
+      "coverageTitle": "Coverage model (additive normalized)",
+      "coverageIntro": "Each member contributes to a station's coverage based on their level (0.15 apprentice → 0.60 senior). Sum until the station's ideal is reached, scaled by the forecast density (Quiet 0.5 / Normal 1.0 / Busy 1.3).",
+      "coverageDetail": "Additive coefficients come from industrial-engineering literature (Bard 2003, Ernst 2004): the simplest way to model « 1 chef = 1 senior + 1 autonomous » without introducing non-linear terms that would make the solver NP-hard.",
+      "scoringTitle": "Multi-criteria scoring function",
+      "scoringIntro": "For each eligible candidate for a slot we compute a score. The solver always picks the highest. The weighting prioritizes hour deficit (a member far from their contractual target is favored), while respecting business preferences (station, default service, level).",
+      "scoringDetail": "The cost-aware penalty (λ = 0.5) means that, at equal deficit, the solver prefers the cheaper member — this is the line that enables the payroll-forecast optimization visible at the top of the schedule. Reference: Bard 2003, Operations Research, on cost-aware staffing formulations.",
+      "iterationTitle": "Multi-pass round-robin iteration loop",
+      "iterationIntro": "Instead of filling the schedule day by day (which would saturate Tue-Wed and leave Sat-Sun empty), the solver runs several passes over the full slot set, starting each pass with the most-uncovered ones. Each slot receives at most one member per pass. Continues until no progress is possible.",
+      "iterationDetail": "This « min-fill-first multi-pass » strategy guarantees that Sunday receives its first member before Tuesday gets its third. Complexity stays polynomial: O(passes × slots × candidates) with passes ≤ max levels per slot, typically < 100 iterations for a 24-slot week.",
+      "healthTitle": "Service Health Score (global indicator)",
+      "healthDetail": "Indicator shown at the top of the schedule. Each under-covered or overloaded slot drags the score down. Green > 75, orange 50-75, red < 50. A synthetic aggregate: a single number to decide whether the week is OK or needs re-planning.",
+      "source": "Theoretical sources: Bard 2003 « Selecting the appropriate input data set when configuring a permanent workforce »; Ernst et al. 2004 « Staff scheduling and rostering: a review of applications, methods and models »; Jordan & Graves 1995 (short chains in versatility); KC & Terwiesch 2009 (sustained workload). The concrete weights (10, 5, 3, 2, λ=0.5) were tuned through restaurant-profile experiments (200+ Playwright scenarios)."
+    },
+    "cost": {
+      "title": "Cost-aware optimization",
+      "lead": "Crew knows each member's hourly rate (entered in the member form or inherited from the HCR default scale).",
+      "detail": "When two assignments satisfy the constraints equally (level, versatility, HCR), the solver prefers the cheaper one. The weekly payroll forecast is shown at the top of the schedule — a reference to balance coverage against budget."
+    },
+    "dnd": {
+      "title": "Drag-and-drop a shift",
+      "lead": "On the Schedule page, each cell is draggable.",
+      "step1": "Click and hold a shift.",
+      "step2": "Drag it to an empty cell (another day or another shift).",
+      "step3": "Release: the shift moves immediately. If the move violates an HCR rule (e.g. exceeds 48h), an alert appears but the move is allowed (you remain the decision-maker)."
+    },
+    "ical": {
+      "title": "Calendar sync (iCal)",
+      "lead": "Each member can subscribe to their schedule from iPhone, Android or Outlook — no app to install.",
+      "detail": "Profile tab → « Calendar sync » card → scan the QR code or copy the .ics URL. Shifts appear in the native calendar with a notification 2h before each service."
+    },
+    "workflow": {
+      "title": "Recommended weekly workflow",
+      "lead": "The weekly ritual that saves the most time:",
+      "step1": "Monday morning — review each member's form (contractual target hours, level, versatility).",
+      "step2": "Set the expected density per day × shift (Quiet / Normal / Busy) based on bookings.",
+      "step3": "Launch the Smart Planner — you get a complete draft in seconds.",
+      "step4": "Adjust manually by drag-and-drop if needed (e.g. a member wants a specific Sunday off).",
+      "step5": "Check no red HCR alert remains, then validate — members receive their shifts in their calendar."
+    }
   }
 }
