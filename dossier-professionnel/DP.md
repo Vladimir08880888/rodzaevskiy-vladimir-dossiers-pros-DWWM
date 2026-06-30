@@ -258,36 +258,33 @@ contrôle total du comportement.
 **2. Drag-and-drop natif avec rendu optimiste + rollback**
 
 ```jsx
-// front/src/pages/Planning.jsx (extrait)
-async function handleDrop(e, targetDate, targetUserId) {
-  e.preventDefault();
-  const shiftId = e.dataTransfer.getData('shift-id');
+// front/src/pages/Planning.jsx (l. 285)
+async function moveShift(shift, newDate, newUserId) {
+  if (shift.date.slice(0, 10) === newDate && shift.user_id === newUserId) return;
   const prev = shifts;
 
-  // Mise à jour optimiste : on déplace le shift localement tout de suite
-  setShifts(shifts.map(s =>
-    s.id === Number(shiftId)
-      ? { ...s, date: targetDate, user_id: targetUserId }
-      : s));
+  // Rendu optimiste : mise à jour locale immédiate
+  setShifts(shifts.map((s) => (s.id === shift.id
+    ? { ...s, date: newDate, user_id: newUserId } : s)));
 
   try {
-    await shiftsApi.update(shiftId, { date: targetDate, user_id: targetUserId });
+    await shiftsApi.update(shift.id, { date: newDate, user_id: newUserId });
+    load(); // re-sync depuis l'API
   } catch (err) {
-    setShifts(prev);          // rollback si le back rejette
-    toast.fromError(err);     // ex. : « Plafond HCR 48 h/semaine dépassé »
+    setShifts(prev);      // rollback automatique
+    toast.fromError(err); // ex. : « Plafond HCR 48 h/semaine dépassé »
   }
 }
 ```
 
-Si le back-end rejette le déplacement (par exemple parce qu'il violerait le
-plafond hebdomadaire HCR de 48 h), l'état est **automatiquement restauré** et
-un toast explique le motif.
+Si le back-end rejette le déplacement (violation du plafond HCR 48 h/semaine
+par exemple), l'état est **automatiquement restauré** et un toast explique le motif.
 
-**3. Validation de la polyvalence côté client**
+**3. Garde côté client sur les drops**
 
-Un slot refuse les drops dans une zone visuellement marquée
-« incompatible » (le poste cible n'est pas dans la matrice de compétences de
-l'équipier), avec une animation CSS de refus.
+La variable `canDropHere` (l. 582) bloque silencieusement le drop si la cellule
+est déjà pleine (≥ 2 shifts) ou si c'est la même position source — sans
+animation de refus, mais avec prévention du `dragover` par défaut.
 
 #### Compétences mises en œuvre
 
