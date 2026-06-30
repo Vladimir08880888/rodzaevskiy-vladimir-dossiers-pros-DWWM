@@ -70,7 +70,7 @@
   figure{margin:16px 0; text-align:center; page-break-inside:avoid;}
   figure img{ max-width:100%; border:1px solid var(--border); border-radius:6px;
               box-shadow:0 1px 4px rgba(0,0,0,.08); }
-  figure img.mobile{ max-width:240px; }
+  figure img.mobile{ max-width:55%; max-height:225mm; width:auto; }
   figcaption{font-size:11px; color:var(--muted); margin-top:6px; font-style:italic;}
   .two-col{ display:flex; gap:16px; align-items:flex-start; justify-content:center; }
   .two-col figure{flex:1;}
@@ -379,18 +379,18 @@ flowchart TD
 </div>
 
 <div class="page pagebreak">
-  <h3>Responsive desktop / mobile</h3>
-  <div class="two-col">
-    <figure>
-      <img src="img/stats.jpg" alt="Page Statistiques">
-      <figcaption>Page Statistiques — graphiques Chart.js (shifts par poste, par équipier,
-        évolution hebdomadaire).</figcaption>
-    </figure>
-    <figure>
-      <img src="img/mobile.jpg" class="mobile" alt="Vue mobile">
-      <figcaption>Vue mobile responsive — application utilisable sur smartphone.</figcaption>
-    </figure>
-  </div>
+  <figure>
+    <img src="img/stats.jpg" alt="Page Statistiques">
+    <figcaption>Page Statistiques (desktop) — graphiques Chart.js : shifts par poste, par équipier,
+      évolution hebdomadaire.</figcaption>
+  </figure>
+
+  <h3>Vue mobile (responsive)</h3>
+  <figure>
+    <img src="img/mobile.jpg" class="mobile" alt="Vue mobile">
+    <figcaption>La même application sur smartphone — l'interface s'adapte au format mobile,
+      utilisable en mobilité sans aucune installation.</figcaption>
+  </figure>
 </div>
 
 <!-- ============ SPECS TECHNIQUES ============ -->
