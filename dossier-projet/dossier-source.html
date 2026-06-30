@@ -20,9 +20,11 @@
     font-family:-apple-system,"Helvetica Neue",Arial,sans-serif;
     color:var(--ink); font-size:13px; line-height:1.55; margin:0;
   }
-  .page{ padding:48px 56px; }
+  @page{ size:A4; margin:17mm 15mm; }
+  .page{ padding:0; }
   h1{ color:var(--navy); font-size:24px; border-bottom:3px solid var(--navy);
-      padding-bottom:8px; margin:0 0 22px; page-break-after:avoid; }
+      padding-bottom:8px; margin:0 0 22px; page-break-before:always; page-break-after:avoid; }
+  h1.nobreak{ page-break-before:avoid; }
   h2{ color:var(--navy); font-size:17px; margin:26px 0 8px;
       border-bottom:1px solid var(--border); padding-bottom:4px; page-break-after:avoid;}
   h3{ color:var(--navy); font-size:14px; margin:18px 0 6px; page-break-after:avoid;}
@@ -43,8 +45,8 @@
   .accent{color:var(--accent);}
   .navy{color:var(--navy);}
   .lead{font-size:14px; color:var(--muted);}
-  .pagebreak{page-break-before:always;}
-  .cover{ height:980px; display:flex; flex-direction:column; justify-content:center;
+  .pagebreak{}
+  .cover{ min-height:250mm; display:flex; flex-direction:column; justify-content:center;
           align-items:center; text-align:center; page-break-after:always;}
   .cover .wordmark{ font-size:64px; font-weight:800; letter-spacing:-2px; color:var(--navy);}
   .cover .wordmark .accent{color:var(--accent);}
@@ -89,7 +91,7 @@
 
 <!-- ============ SOMMAIRE ============ -->
 <div class="page">
-  <h1>Sommaire</h1>
+  <h1 class="nobreak">Sommaire</h1>
   <div class="toc">
     <div class="row lvl1"><span>Introduction</span><span>3</span></div>
     <div class="row lvl1"><span>Liste des compétences couvertes par le projet</span><span>4</span></div>
@@ -116,8 +118,6 @@
 <!-- ============ INTRODUCTION ============ -->
 <div class="page pagebreak">
   <h1>Introduction</h1>
-  <div class="note"><b>À personnaliser :</b> ce paragraphe est un brouillon — remplace-le par ton parcours réel
-   (La Plateforme_, motivations, contexte). Garde le ton « je » et la longueur d'une page.</div>
 
   <p>Je m'appelle Vladimir Rodzaevskiy et je présente le titre professionnel
   <b>Développeur Web et Web Mobile</b>. Avant cette formation, je m'étais déjà initié au
@@ -856,8 +856,8 @@ export const loginLimiter = rateLimit({
     <tr><td>4.3</td><td>Token erroné</td><td>Flux vide / 404, pas de fuite</td><td>OK</td></tr>
   </table>
 
-  <div class="note"><b>Suite prévue :</b> ajouter une couche de tests automatisés (Vitest + supertest)
-  sur le solver (plafonds HCR, scoring) et l'authentification, pour compléter cette couverture manuelle.</div>
+  <p><b>Suite prévue :</b> ajouter une couche de tests automatisés (Vitest + supertest) sur le solver
+  (plafonds HCR, scoring) et l'authentification, pour compléter cette couverture manuelle.</p>
 </div>
 
 <!-- ============ VEILLE ============ -->
@@ -915,9 +915,6 @@ export const loginLimiter = rateLimit({
   <p>La même philosophie que Bard et al. (couverture imposée, coût pénalisé) est donc conservée, sous
   une forme heuristique adaptée à un usage interactif. La limite assumée — une solution quasi-optimale
   plutôt qu'optimale — est acceptable car le manager ajuste toujours la proposition avant publication.</p>
-
-  <div class="note"><b>À enrichir si tu veux :</b> insère ici une capture de la page d'une des sources
-  (ex. l'abstract de l'article EJOR 2004) pour matérialiser la veille, comme dans l'exemple de référence.</div>
 </div>
 
 <!-- ============ EVOLUTIONS ============ -->
@@ -1011,9 +1008,6 @@ export const loginLimiter = rateLimit({
   système complet — du modèle de données à la mise en production — et la capacité à mener un projet
   technique exigeant de façon autonome et rigoureuse, dans un cadre proche d'un contexte
   professionnel.</p>
-
-  <div class="note"><b>À compléter :</b> ajoute ici un mot de remerciement (formateur, La Plateforme_)
-  si tu le souhaites, comme dans le dossier de référence.</div>
 </div>
 
 </body>
